@@ -159,6 +159,17 @@ describe("PokechainNFT", function () {
             await pokechainNFT.connect(addr1).mint(5, { value: MINT_PRICE * 5n });
             expect(await pokechainNFT.walletMinted(addr1.address)).to.equal(5);
         });
+
+        it("Should reject minting that exceeds max supply", async function () {
+            // This test simulates exceeding max supply
+            // We can't mint 1025 in a test easily, but we can verify the check works
+            // by trying to mint more than remaining
+            // First, we need a scenario where supply is near max
+            // For now, test that minting totalSupply + quantity > MAX_SUPPLY fails logically
+            const toMint = MAX_SUPPLY + 1;
+            await expect(pokechainNFT.connect(addr1).mint(toMint, { value: MINT_PRICE * BigInt(toMint) }))
+                .to.be.revertedWith("Exceeds max supply");
+        });
     });
 
     describe("Token URI", function () {

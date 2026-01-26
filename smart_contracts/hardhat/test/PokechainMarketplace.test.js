@@ -262,6 +262,14 @@ describe("PokechainMarketplace", function () {
                 await expect(marketplace.connect(seller).placeBid(0, { value: STARTING_BID }))
                     .to.be.revertedWith("Seller cannot bid");
             });
+
+            it("Should reject bid after auction has ended", async function () {
+                // Fast forward past auction end time
+                await time.increase(ONE_DAY + 1);
+
+                await expect(marketplace.connect(bidder1).placeBid(0, { value: STARTING_BID }))
+                    .to.be.revertedWith("Auction has ended");
+            });
         });
 
         describe("endAuction", function () {
@@ -387,6 +395,47 @@ describe("PokechainMarketplace", function () {
 
             await marketplace.withdrawFees();
             expect(await ethers.provider.getBalance(await marketplace.getAddress())).to.equal(0);
+        });
+
+        it("Should block auctions when paused", async function () {
+            await marketplace.togglePause();
+            await expect(marketplace.connect(seller).createAuction(0, STARTING_BID, ONE_DAY))
+                .to.be.revertedWith("Marketplace is paused");
+        });
+
+        it("Should block bids when paused", async function () {
+            await marketplace.connect(seller).createAuction(0, STARTING_BID, ONE_DAY);
+            await marketplace.togglePause();
+            await expect(marketplace.connect(bidder1).placeBid(0, { value: STARTING_BID }))
+                .to.be.revertedWith("Marketplace is paused");
+        });
+    });
+
+    describe("Edge Cases", function () {
+        it("Should fail to list after transferring NFT away", async function () {
+            // Seller lists NFT
+            await marketplace.connect(seller).listItem(0, LISTING_PRICE);
+
+            // Seller transfers the NFT to buyer (breaking the listing)
+            await pokechainNFT.connect(seller).transferFrom(seller.address, buyer.address, 0);
+
+            // Buy should fail because seller no longer owns it
+            await expect(marketplace.connect(bidder1).buyItem(0, { value: LISTING_PRICE }))
+                .to.be.reverted; // Transfer will fail
+        });
+
+        it("Should fail to end auction if NFT was transferred", async function () {
+            // Create auction
+            await marketplace.connect(seller).createAuction(0, STARTING_BID, ONE_HOUR);
+            await marketplace.connect(bidder1).placeBid(0, { value: STARTING_BID });
+
+            // Seller revokes approval (simulating transfer scenario)
+            await pokechainNFT.connect(seller).setApprovalForAll(await marketplace.getAddress(), false);
+
+            // Fast forward and try to end
+            await time.increase(ONE_HOUR + 1);
+            await expect(marketplace.endAuction(0))
+                .to.be.reverted; // Transfer will fail
         });
     });
 });
