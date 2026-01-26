@@ -86,21 +86,25 @@ ethermon/
 ## 🧪 Testing
 
 ```bash
-# Run all tests
+# Run all unit tests (81 tests)
 npx hardhat test
 
 # Run specific test file
 npx hardhat test test/PokechainNFT.test.js
 npx hardhat test test/PokechainMarketplace.test.js
 
+# Run visual workflow demo
+npx hardhat run scripts/test-workflow.js
+
 # With gas reporting
 REPORT_GAS=true npx hardhat test
 ```
 
 **Test Coverage:**
-- PokechainNFT: 31 tests
-- PokechainMarketplace: 44 tests
-- **Total: 75 tests**
+- PokechainNFT: 32 tests
+- PokechainMarketplace: 49 tests
+- **Total: 81 unit tests**
+- **Workflow Demo: 18 step-by-step scenarios**
 
 ## 📦 Metadata
 
