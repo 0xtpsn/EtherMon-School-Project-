@@ -1,0 +1,52 @@
+{
+  "name": "Pangoro #675",
+  "description": "Fighting-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/675.png",
+  "external_url": "https://pokechain.io/pokemon/675",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fighting"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Dark"
+    },
+    {
+      "trait_type": "HP",
+      "value": 95
+    },
+    {
+      "trait_type": "Attack",
+      "value": 124
+    },
+    {
+      "trait_type": "Defense",
+      "value": 78
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 69
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 71
+    },
+    {
+      "trait_type": "Speed",
+      "value": 58
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 675
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 6
+    }
+  ]
+}

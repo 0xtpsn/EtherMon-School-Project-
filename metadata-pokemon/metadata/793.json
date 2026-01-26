@@ -1,0 +1,52 @@
+{
+  "name": "Nihilego #793",
+  "description": "Rock-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/793.png",
+  "external_url": "https://pokechain.io/pokemon/793",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Rock"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Poison"
+    },
+    {
+      "trait_type": "HP",
+      "value": 109
+    },
+    {
+      "trait_type": "Attack",
+      "value": 53
+    },
+    {
+      "trait_type": "Defense",
+      "value": 47
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 127
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 131
+    },
+    {
+      "trait_type": "Speed",
+      "value": 103
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 793
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "Durant #632",
+  "description": "Bug-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/632.png",
+  "external_url": "https://pokechain.io/pokemon/632",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Bug"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "HP",
+      "value": 58
+    },
+    {
+      "trait_type": "Attack",
+      "value": 109
+    },
+    {
+      "trait_type": "Defense",
+      "value": 112
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 48
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 48
+    },
+    {
+      "trait_type": "Speed",
+      "value": 109
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 632
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

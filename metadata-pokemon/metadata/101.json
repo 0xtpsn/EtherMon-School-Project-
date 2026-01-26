@@ -1,0 +1,48 @@
+{
+  "name": "Electrode #101",
+  "description": "Electric-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/101.png",
+  "external_url": "https://pokechain.io/pokemon/101",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Electric"
+    },
+    {
+      "trait_type": "HP",
+      "value": 60
+    },
+    {
+      "trait_type": "Attack",
+      "value": 50
+    },
+    {
+      "trait_type": "Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 80
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 80
+    },
+    {
+      "trait_type": "Speed",
+      "value": 150
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 101
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "Hakamo-o #783",
+  "description": "Dragon-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/783.png",
+  "external_url": "https://pokechain.io/pokemon/783",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Dragon"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Fighting"
+    },
+    {
+      "trait_type": "HP",
+      "value": 55
+    },
+    {
+      "trait_type": "Attack",
+      "value": 75
+    },
+    {
+      "trait_type": "Defense",
+      "value": 90
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Speed",
+      "value": 65
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 783
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

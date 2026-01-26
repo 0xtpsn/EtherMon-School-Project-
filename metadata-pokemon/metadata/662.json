@@ -1,0 +1,52 @@
+{
+  "name": "Fletchinder #662",
+  "description": "Fire-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/662.png",
+  "external_url": "https://pokechain.io/pokemon/662",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fire"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 62
+    },
+    {
+      "trait_type": "Attack",
+      "value": 73
+    },
+    {
+      "trait_type": "Defense",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 56
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 52
+    },
+    {
+      "trait_type": "Speed",
+      "value": 84
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 662
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 6
+    }
+  ]
+}

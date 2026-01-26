@@ -1,0 +1,48 @@
+{
+  "name": "Leafeon #470",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/470.png",
+  "external_url": "https://pokechain.io/pokemon/470",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "HP",
+      "value": 65
+    },
+    {
+      "trait_type": "Attack",
+      "value": 110
+    },
+    {
+      "trait_type": "Defense",
+      "value": 130
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Speed",
+      "value": 95
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 470
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

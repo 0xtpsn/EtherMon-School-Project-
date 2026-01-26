@@ -1,0 +1,48 @@
+{
+  "name": "Grubbin #736",
+  "description": "Bug-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/736.png",
+  "external_url": "https://pokechain.io/pokemon/736",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Bug"
+    },
+    {
+      "trait_type": "HP",
+      "value": 47
+    },
+    {
+      "trait_type": "Attack",
+      "value": 62
+    },
+    {
+      "trait_type": "Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Speed",
+      "value": 46
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 736
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

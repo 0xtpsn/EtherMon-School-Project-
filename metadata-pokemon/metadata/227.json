@@ -1,0 +1,52 @@
+{
+  "name": "Skarmory #227",
+  "description": "Steel-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/227.png",
+  "external_url": "https://pokechain.io/pokemon/227",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 65
+    },
+    {
+      "trait_type": "Attack",
+      "value": 80
+    },
+    {
+      "trait_type": "Defense",
+      "value": 140
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Speed",
+      "value": 70
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 227
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 2
+    }
+  ]
+}

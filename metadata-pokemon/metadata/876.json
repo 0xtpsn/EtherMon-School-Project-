@@ -1,0 +1,52 @@
+{
+  "name": "Indeedee-male #876",
+  "description": "Psychic-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/876.png",
+  "external_url": "https://pokechain.io/pokemon/876",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "HP",
+      "value": 60
+    },
+    {
+      "trait_type": "Attack",
+      "value": 65
+    },
+    {
+      "trait_type": "Defense",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 105
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 95
+    },
+    {
+      "trait_type": "Speed",
+      "value": 95
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 876
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Barraskewda #847",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/847.png",
+  "external_url": "https://pokechain.io/pokemon/847",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 61
+    },
+    {
+      "trait_type": "Attack",
+      "value": 123
+    },
+    {
+      "trait_type": "Defense",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 50
+    },
+    {
+      "trait_type": "Speed",
+      "value": 136
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 847
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

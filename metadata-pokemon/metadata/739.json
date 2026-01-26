@@ -1,0 +1,48 @@
+{
+  "name": "Crabrawler #739",
+  "description": "Fighting-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/739.png",
+  "external_url": "https://pokechain.io/pokemon/739",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fighting"
+    },
+    {
+      "trait_type": "HP",
+      "value": 47
+    },
+    {
+      "trait_type": "Attack",
+      "value": 82
+    },
+    {
+      "trait_type": "Defense",
+      "value": 57
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 42
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 47
+    },
+    {
+      "trait_type": "Speed",
+      "value": 63
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 739
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

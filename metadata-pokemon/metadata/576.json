@@ -1,0 +1,48 @@
+{
+  "name": "Gothitelle #576",
+  "description": "Psychic-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/576.png",
+  "external_url": "https://pokechain.io/pokemon/576",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "HP",
+      "value": 70
+    },
+    {
+      "trait_type": "Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Defense",
+      "value": 95
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 95
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 110
+    },
+    {
+      "trait_type": "Speed",
+      "value": 65
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 576
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

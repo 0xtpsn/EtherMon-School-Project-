@@ -1,0 +1,48 @@
+{
+  "name": "Pansage #511",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/511.png",
+  "external_url": "https://pokechain.io/pokemon/511",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "HP",
+      "value": 50
+    },
+    {
+      "trait_type": "Attack",
+      "value": 53
+    },
+    {
+      "trait_type": "Defense",
+      "value": 48
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 53
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 48
+    },
+    {
+      "trait_type": "Speed",
+      "value": 64
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 511
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

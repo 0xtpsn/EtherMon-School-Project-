@@ -1,0 +1,52 @@
+{
+  "name": "Croagunk #453",
+  "description": "Poison-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/453.png",
+  "external_url": "https://pokechain.io/pokemon/453",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Poison"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Fighting"
+    },
+    {
+      "trait_type": "HP",
+      "value": 48
+    },
+    {
+      "trait_type": "Attack",
+      "value": 61
+    },
+    {
+      "trait_type": "Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 61
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Speed",
+      "value": 50
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 453
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

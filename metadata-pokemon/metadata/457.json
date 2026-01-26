@@ -1,0 +1,48 @@
+{
+  "name": "Lumineon #457",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/457.png",
+  "external_url": "https://pokechain.io/pokemon/457",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 69
+    },
+    {
+      "trait_type": "Attack",
+      "value": 69
+    },
+    {
+      "trait_type": "Defense",
+      "value": 76
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 69
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 86
+    },
+    {
+      "trait_type": "Speed",
+      "value": 91
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 457
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

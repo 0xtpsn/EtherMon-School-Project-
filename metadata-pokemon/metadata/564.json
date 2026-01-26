@@ -1,0 +1,52 @@
+{
+  "name": "Tirtouga #564",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/564.png",
+  "external_url": "https://pokechain.io/pokemon/564",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Rock"
+    },
+    {
+      "trait_type": "HP",
+      "value": 54
+    },
+    {
+      "trait_type": "Attack",
+      "value": 78
+    },
+    {
+      "trait_type": "Defense",
+      "value": 103
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 53
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Speed",
+      "value": 22
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 564
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

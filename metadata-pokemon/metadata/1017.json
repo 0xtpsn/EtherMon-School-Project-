@@ -1,0 +1,48 @@
+{
+  "name": "Ogerpon #1017",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/1017.png",
+  "external_url": "https://pokechain.io/pokemon/1017",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "HP",
+      "value": 80
+    },
+    {
+      "trait_type": "Attack",
+      "value": 120
+    },
+    {
+      "trait_type": "Defense",
+      "value": 84
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 96
+    },
+    {
+      "trait_type": "Speed",
+      "value": 110
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 1017
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 9
+    }
+  ]
+}

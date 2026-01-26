@@ -1,0 +1,52 @@
+{
+  "name": "Moltres #146",
+  "description": "Fire-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/146.png",
+  "external_url": "https://pokechain.io/pokemon/146",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fire"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 90
+    },
+    {
+      "trait_type": "Attack",
+      "value": 100
+    },
+    {
+      "trait_type": "Defense",
+      "value": 90
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 125
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 85
+    },
+    {
+      "trait_type": "Speed",
+      "value": 90
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 146
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

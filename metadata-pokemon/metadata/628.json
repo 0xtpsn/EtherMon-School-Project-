@@ -1,0 +1,52 @@
+{
+  "name": "Braviary #628",
+  "description": "Normal-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/628.png",
+  "external_url": "https://pokechain.io/pokemon/628",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 100
+    },
+    {
+      "trait_type": "Attack",
+      "value": 123
+    },
+    {
+      "trait_type": "Defense",
+      "value": 75
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 57
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 75
+    },
+    {
+      "trait_type": "Speed",
+      "value": 80
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 628
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Flabebe #669",
+  "description": "Fairy-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/669.png",
+  "external_url": "https://pokechain.io/pokemon/669",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fairy"
+    },
+    {
+      "trait_type": "HP",
+      "value": 44
+    },
+    {
+      "trait_type": "Attack",
+      "value": 38
+    },
+    {
+      "trait_type": "Defense",
+      "value": 39
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 61
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 79
+    },
+    {
+      "trait_type": "Speed",
+      "value": 42
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 669
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 6
+    }
+  ]
+}

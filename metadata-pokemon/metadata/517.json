@@ -1,0 +1,48 @@
+{
+  "name": "Munna #517",
+  "description": "Psychic-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/517.png",
+  "external_url": "https://pokechain.io/pokemon/517",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "HP",
+      "value": 76
+    },
+    {
+      "trait_type": "Attack",
+      "value": 25
+    },
+    {
+      "trait_type": "Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 67
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 55
+    },
+    {
+      "trait_type": "Speed",
+      "value": 24
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 517
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

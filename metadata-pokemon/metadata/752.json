@@ -1,0 +1,52 @@
+{
+  "name": "Araquanid #752",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/752.png",
+  "external_url": "https://pokechain.io/pokemon/752",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Bug"
+    },
+    {
+      "trait_type": "HP",
+      "value": 68
+    },
+    {
+      "trait_type": "Attack",
+      "value": 70
+    },
+    {
+      "trait_type": "Defense",
+      "value": 92
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 50
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 132
+    },
+    {
+      "trait_type": "Speed",
+      "value": 42
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 752
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

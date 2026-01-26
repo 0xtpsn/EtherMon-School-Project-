@@ -1,191 +1,158 @@
-# ArtMart - Digital Art Marketplace
+# PokéChain - Decentralized Pokémon NFT Trading Platform
 
-A full-stack digital art marketplace with auction capabilities, built with React, TypeScript, Flask, and SQLite.
+A Web3 marketplace for trading Pokémon NFTs with fixed-price sales and auctions.
 
-## Features
-
-- **Artwork Management**: Create, list, and manage digital artworks (fixed-price listings with optional expiry and auctions)
-- **Auction System**: Time-limited auctions with reserve prices, quick bids, and automatic closing jobs
-- **User Profiles**: Customizable artist/collector profiles, role-aware default bios, social links, and watchlists
-- **Watchlist System**: Monitor auctions or fixed-price pieces, receive outbid/ending alerts, and manage favorites
-- **Balance System**: Internal ledger for deposits, withdrawals, and automated refunds when auctions settle
-- **Notifications**: In-app feed plus opt-in email notifications with per-type preferences (bid, sale, watchlist, etc.)
-- **Search & Discovery**: Multi-view (card grid & analytics table) search with category/status/price filters, sorting, and shareable URLs
-- **Role-Based Access Control**: Buyer, seller, and "both" roles with server-side enforcement on protected routes
-- **Security & Account Recovery**: Password reset via email tokens, rate limiting, input validation, and session management
-
-## Tech Stack
-
-**Frontend:**
-- React 18 with TypeScript
-- Vite for build tooling
-- Tailwind CSS + shadcn/ui components
-- React Router v6
-
-**Backend:**
-- Flask (Python) REST API
-- SQLite database
-- APScheduler for background jobs
-- SMTP support for email notifications
-
-## Prerequisites
-
-- Node.js v18 or higher
-- Python 3.8 or higher
-- npm (comes with Node.js)
-- pip (Python package manager)
-
-## Quick Start
-
-### 1. Clone the Repository
+## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/managerdotapp/art-offchain-avenue.git
-cd art-offchain-avenue
-```
-
-### 2. Install Dependencies
-
-**Frontend:**
-```bash
+# Clone and install
+cd smart_contracts/hardhat
 npm install
+
+# Run tests
+npx hardhat test
+
+# Start local blockchain
+npx hardhat node
+
+# Deploy contracts (in new terminal)
+npx hardhat run scripts/deploy.js --network localhost
 ```
 
-**Backend:**
+## 📁 Project Structure
+
+```
+ethermon/
+├── smart_contracts/hardhat/
+│   ├── contracts/
+│   │   ├── PokechainNFT.sol         # ERC721A NFT contract
+│   │   ├── PokechainMarketplace.sol # Trading + Auction contract
+│   │   ├── ERC721A/                 # Gas-optimized NFT standard
+│   │   ├── access/Ownable.sol       # Access control
+│   │   └── utils/                   # ReentrancyGuard, Strings
+│   ├── test/                        # 75 comprehensive tests
+│   └── scripts/                     # Deployment scripts
+├── metadata-pokemon/
+│   ├── images/                      # 1025 Pokémon images
+│   └── metadata/                    # OpenSea-format JSON files
+└── frontend/                        # React + Vite application
+```
+
+## 🔗 Smart Contracts
+
+### PokechainNFT.sol
+| Feature | Implementation |
+|---------|---------------|
+| Standard | ERC721A (gas-optimized) |
+| Supply | 1,025 (one per Pokémon) |
+| Mint Price | 0.01 ETH |
+| Per Wallet | Max 50 mints |
+| Randomization | Blind box (Pokémon assigned on mint) |
+
+**Key Functions:**
+- `mint(quantity)` - Mint NFTs (when sale active)
+- `toggleSale()` - Owner enables/disables minting
+- `withdraw()` - Owner withdraws funds
+- `getPokemonId(tokenId)` - Get assigned Pokémon
+
+### PokechainMarketplace.sol
+| Feature | Implementation |
+|---------|---------------|
+| Fixed-Price | List, buy, cancel, update listings |
+| Auctions | Create, bid, end, cancel auctions |
+| Platform Fee | 2.5% (configurable, max 10%) |
+| Security | ReentrancyGuard, Pausable |
+
+**Key Functions:**
+- `listItem(tokenId, price)` - List for fixed price
+- `buyItem(tokenId)` - Purchase listed NFT
+- `createAuction(tokenId, startingPrice, duration)` - Start auction
+- `placeBid(tokenId)` - Place bid on auction
+- `endAuction(tokenId)` - Finalize auction
+- `withdraw()` - Claim outbid refunds
+- `getTokenStatus(tokenId)` - Check if listed/auctioned
+
+## 🔒 Security Features
+
+| Feature | Implementation |
+|---------|---------------|
+| Reentrancy Protection | `ReentrancyGuard` on all payable functions |
+| Access Control | `Ownable` + custom modifiers |
+| Overflow Protection | Solidity 0.8.14 built-in checks |
+| Emergency Stop | `togglePause()` freezes marketplace |
+| Pull Payment | Outbid funds in `pendingReturns`, users call `withdraw()` |
+| Event Emission | All state changes emit events |
+
+## 🧪 Testing
+
 ```bash
-# Using pip directly
-pip install -r backend/requirements.txt
+# Run all tests
+npx hardhat test
 
-# Or using a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r backend/requirements.txt
+# Run specific test file
+npx hardhat test test/PokechainNFT.test.js
+npx hardhat test test/PokechainMarketplace.test.js
+
+# With gas reporting
+REPORT_GAS=true npx hardhat test
 ```
 
-### 3. Initialize Database
+**Test Coverage:**
+- PokechainNFT: 31 tests
+- PokechainMarketplace: 44 tests
+- **Total: 75 tests**
 
+## 📦 Metadata
+
+All 1,025 Pokémon with OpenSea-compatible metadata:
+
+```json
+{
+  "name": "Pikachu #25",
+  "description": "Electric-type Pokémon from the Pokechain Collection",
+  "image": "ipfs://bafybeiffqjps.../25.png",
+  "attributes": [
+    {"trait_type": "Type", "value": "Electric"},
+    {"trait_type": "HP", "value": 35},
+    {"trait_type": "Attack", "value": 55},
+    {"trait_type": "Rarity", "value": "Uncommon"}
+  ]
+}
+```
+
+**IPFS Links:**
+- Images: `bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm`
+- Metadata: `bafybeienzjyalm2axjk3gx75mcrbjjjv2ej3j5guoaeddjifgryheut57m`
+
+## 🛠️ Development
+
+**Requirements:**
+- Node.js v18+
+- npm or yarn
+
+**Environment:**
 ```bash
-python -m backend.db
+# Install dependencies
+npm install
+
+# Compile contracts
+npx hardhat compile
+
+# Run local node
+npx hardhat node
+
+# Deploy to local
+npx hardhat run scripts/deploy.js --network localhost
 ```
 
-To seed with sample data:
-```bash
-python -c "from backend.db import init_db; init_db(sample=True)"
-```
+## 📄 License
 
-### 4. Run the Application
+MIT
 
-**Terminal 1 - Backend:**
-```bash
-python -m backend.app
-``` 
-Backend runs at `http://localhost:5000`
+## 👥 Team
 
-**Terminal 2 - Frontend:**
-```bash
-npm run dev
-```
-Frontend runs at `http://localhost:5173`
+[Your names here]
 
-## Environment Variables
+---
 
-**Frontend:**
-- `VITE_API_BASE_URL` - API base URL (defaults to `http://localhost:5000/api`)
-
-**Backend:**
-- `FLASK_SECRET_KEY` - Secret key for sessions (defaults to `dev-secret-key`)
-- `SMTP_HOST` - SMTP server hostname (optional, for email notifications)
-- `SMTP_PORT` - SMTP port (defaults to 587)
-- `SMTP_USER` - SMTP username (optional)
-- `SMTP_PASSWORD` - SMTP password (optional)
-- `SMTP_FROM` - From email address (optional)
-
-See `SETUP_EMAIL.md` for detailed email configuration.
-
-## API Documentation
-
-### Authentication
-- `POST /api/register` - Register new user
-- `POST /api/login` - User login
-- `POST /api/logout` - User logout
-- `GET /api/session` - Get current session
-- `POST /api/password/change` - Change password
-
-### Artworks
-- `GET /api/artworks` - List artworks (with filters)
-- `GET /api/artworks/<id>` - Get artwork details
-- `POST /api/artworks` - Create artwork (seller only)
-- `PUT /api/artworks/<id>` - Update artwork
-- `POST /api/artworks/<id>/list` - List artwork for sale/auction (supports fixed-price with expiry and timed auctions with reserve price)
-- `POST /api/artworks/<id>/bids` - Place bid
-- `POST /api/artworks/<id>/purchase` - Purchase artwork
-- `POST /api/artworks/<id>/watch` - Toggle watchlist status
-
-### Auctions
-- `GET /api/auctions` - List auctions
-- `GET /api/auctions/<id>` - Get auction details
-- `POST /api/auctions` - Create auction
-- `POST /api/auctions/<id>/bids` - Place bid on auction
-
-### User & Profile
-- `GET /api/me/profile` - Get own profile
-- `GET /api/profiles/<identifier>` - Get user profile (includes watchlist_artworks for own profile)
-- `PUT /api/me/profile` - Update profile
-- `GET /api/me/auctions` - Get my auctions
-- `GET /api/me/bids` - Get my bids
-
-### Balance & Transactions
-- `GET /api/balance` - Get balance
-- `POST /api/deposits` - Make deposit
-- `POST /api/withdrawals` - Request withdrawal
-- `GET /api/transactions` - Get transaction history
-
-### Other
-- `GET /api/search?q=<query>` - Search artworks and users
-- `GET /api/recommendations` - Get artwork recommendations
-- `GET /api/notifications` - Get notifications
-- `POST /api/notifications/mark-read` - Mark notification as read
-
-## Testing
-
-Run backend tests:
-```bash
-pytest tests/ -v
-```
-
-With coverage:
-```bash
-pytest tests/ --cov=backend --cov-report=html
-```
-
-## Project Structure
-
-```
-art-offchain-avenue/
-├── backend/           # Flask backend
-│   ├── routes/        # API route handlers
-│   ├── services/      # Business logic
-│   ├── repositories/  # Data access layer
-│   ├── middleware/    # Auth, rate limiting, etc.
-│   └── schema.sql     # Database schema
-├── src/               # React frontend
-│   ├── api/          # API client modules
-│   ├── components/   # React components
-│   ├── pages/        # Page components
-│   └── context/      # React context providers
-└── tests/            # Backend tests
-```
-
-## Documentation
-
-- `ARCHITECTURE.md` - System architecture and design decisions
-- `CHANGELOG.md` - Detailed changelog of all updates and features
-- `ER_DIAGRAM.md` - Entity-Relationship diagram
-- `SETUP_INSTRUCTIONS.md` - Detailed setup guide
-- `SETUP_EMAIL.md` - Email configuration guide
-- `CONTRIBUTING.md` - Development setup and contribution guidelines
-- `backend/schema.sql` - Complete database schema
-
-## License
-
-This project is for educational purposes as part of a database systems course assignment.
+Built with Hardhat, ERC721A, and ❤️

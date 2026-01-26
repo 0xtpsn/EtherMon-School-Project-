@@ -1,0 +1,48 @@
+{
+  "name": "Sirfetchd #865",
+  "description": "Fighting-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/865.png",
+  "external_url": "https://pokechain.io/pokemon/865",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fighting"
+    },
+    {
+      "trait_type": "HP",
+      "value": 62
+    },
+    {
+      "trait_type": "Attack",
+      "value": 135
+    },
+    {
+      "trait_type": "Defense",
+      "value": 95
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 68
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 82
+    },
+    {
+      "trait_type": "Speed",
+      "value": 65
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 865
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

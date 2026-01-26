@@ -1,0 +1,48 @@
+{
+  "name": "Feraligatr #160",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/160.png",
+  "external_url": "https://pokechain.io/pokemon/160",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 85
+    },
+    {
+      "trait_type": "Attack",
+      "value": 105
+    },
+    {
+      "trait_type": "Defense",
+      "value": 100
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 79
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 83
+    },
+    {
+      "trait_type": "Speed",
+      "value": 78
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 160
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 2
+    }
+  ]
+}

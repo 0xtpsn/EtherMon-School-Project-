@@ -1,0 +1,52 @@
+{
+  "name": "Dialga #483",
+  "description": "Steel-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/483.png",
+  "external_url": "https://pokechain.io/pokemon/483",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Dragon"
+    },
+    {
+      "trait_type": "HP",
+      "value": 100
+    },
+    {
+      "trait_type": "Attack",
+      "value": 120
+    },
+    {
+      "trait_type": "Defense",
+      "value": 120
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 150
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 100
+    },
+    {
+      "trait_type": "Speed",
+      "value": 90
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 483
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

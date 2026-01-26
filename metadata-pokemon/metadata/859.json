@@ -1,0 +1,52 @@
+{
+  "name": "Impidimp #859",
+  "description": "Dark-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/859.png",
+  "external_url": "https://pokechain.io/pokemon/859",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Dark"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Fairy"
+    },
+    {
+      "trait_type": "HP",
+      "value": 45
+    },
+    {
+      "trait_type": "Attack",
+      "value": 45
+    },
+    {
+      "trait_type": "Defense",
+      "value": 30
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Speed",
+      "value": 50
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 859
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

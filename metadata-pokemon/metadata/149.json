@@ -1,0 +1,52 @@
+{
+  "name": "Dragonite #149",
+  "description": "Dragon-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/149.png",
+  "external_url": "https://pokechain.io/pokemon/149",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Dragon"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 91
+    },
+    {
+      "trait_type": "Attack",
+      "value": 134
+    },
+    {
+      "trait_type": "Defense",
+      "value": 95
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 100
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 100
+    },
+    {
+      "trait_type": "Speed",
+      "value": 80
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 149
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

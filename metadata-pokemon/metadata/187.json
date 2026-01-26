@@ -1,0 +1,52 @@
+{
+  "name": "Hoppip #187",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/187.png",
+  "external_url": "https://pokechain.io/pokemon/187",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 35
+    },
+    {
+      "trait_type": "Attack",
+      "value": 35
+    },
+    {
+      "trait_type": "Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 35
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 55
+    },
+    {
+      "trait_type": "Speed",
+      "value": 50
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 187
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 2
+    }
+  ]
+}

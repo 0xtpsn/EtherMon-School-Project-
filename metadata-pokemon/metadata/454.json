@@ -1,0 +1,52 @@
+{
+  "name": "Toxicroak #454",
+  "description": "Poison-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/454.png",
+  "external_url": "https://pokechain.io/pokemon/454",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Poison"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Fighting"
+    },
+    {
+      "trait_type": "HP",
+      "value": 83
+    },
+    {
+      "trait_type": "Attack",
+      "value": 106
+    },
+    {
+      "trait_type": "Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 86
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Speed",
+      "value": 85
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 454
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

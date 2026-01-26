@@ -1,0 +1,48 @@
+{
+  "name": "Capsakid #951",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/951.png",
+  "external_url": "https://pokechain.io/pokemon/951",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "HP",
+      "value": 50
+    },
+    {
+      "trait_type": "Attack",
+      "value": 62
+    },
+    {
+      "trait_type": "Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 62
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Speed",
+      "value": 50
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 951
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 9
+    }
+  ]
+}

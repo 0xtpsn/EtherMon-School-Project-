@@ -1,0 +1,48 @@
+{
+  "name": "Rookidee #821",
+  "description": "Flying-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/821.png",
+  "external_url": "https://pokechain.io/pokemon/821",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 38
+    },
+    {
+      "trait_type": "Attack",
+      "value": 47
+    },
+    {
+      "trait_type": "Defense",
+      "value": 35
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 33
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 35
+    },
+    {
+      "trait_type": "Speed",
+      "value": 57
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 821
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

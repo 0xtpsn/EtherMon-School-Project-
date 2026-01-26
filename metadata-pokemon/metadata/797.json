@@ -1,0 +1,52 @@
+{
+  "name": "Celesteela #797",
+  "description": "Steel-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/797.png",
+  "external_url": "https://pokechain.io/pokemon/797",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 97
+    },
+    {
+      "trait_type": "Attack",
+      "value": 101
+    },
+    {
+      "trait_type": "Defense",
+      "value": 103
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 107
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 101
+    },
+    {
+      "trait_type": "Speed",
+      "value": 61
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 797
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

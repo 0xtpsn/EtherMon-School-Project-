@@ -1,0 +1,48 @@
+{
+  "name": "Feebas #349",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/349.png",
+  "external_url": "https://pokechain.io/pokemon/349",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 20
+    },
+    {
+      "trait_type": "Attack",
+      "value": 15
+    },
+    {
+      "trait_type": "Defense",
+      "value": 20
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 10
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 55
+    },
+    {
+      "trait_type": "Speed",
+      "value": 80
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 349
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 3
+    }
+  ]
+}

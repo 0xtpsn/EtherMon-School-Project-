@@ -1,0 +1,48 @@
+{
+  "name": "Manaphy #490",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/490.png",
+  "external_url": "https://pokechain.io/pokemon/490",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 100
+    },
+    {
+      "trait_type": "Attack",
+      "value": 100
+    },
+    {
+      "trait_type": "Defense",
+      "value": 100
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 100
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 100
+    },
+    {
+      "trait_type": "Speed",
+      "value": 100
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 490
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

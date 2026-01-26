@@ -1,0 +1,52 @@
+{
+  "name": "Walrein #365",
+  "description": "Ice-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/365.png",
+  "external_url": "https://pokechain.io/pokemon/365",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Ice"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 110
+    },
+    {
+      "trait_type": "Attack",
+      "value": 80
+    },
+    {
+      "trait_type": "Defense",
+      "value": 90
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 95
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 90
+    },
+    {
+      "trait_type": "Speed",
+      "value": 65
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 365
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 3
+    }
+  ]
+}

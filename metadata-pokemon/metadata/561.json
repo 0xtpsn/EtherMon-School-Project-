@@ -1,0 +1,52 @@
+{
+  "name": "Sigilyph #561",
+  "description": "Psychic-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/561.png",
+  "external_url": "https://pokechain.io/pokemon/561",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 72
+    },
+    {
+      "trait_type": "Attack",
+      "value": 58
+    },
+    {
+      "trait_type": "Defense",
+      "value": 80
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 103
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 80
+    },
+    {
+      "trait_type": "Speed",
+      "value": 97
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 561
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

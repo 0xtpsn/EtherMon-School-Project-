@@ -1,0 +1,48 @@
+{
+  "name": "Fuecoco #909",
+  "description": "Fire-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/909.png",
+  "external_url": "https://pokechain.io/pokemon/909",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fire"
+    },
+    {
+      "trait_type": "HP",
+      "value": 67
+    },
+    {
+      "trait_type": "Attack",
+      "value": 45
+    },
+    {
+      "trait_type": "Defense",
+      "value": 59
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 63
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Speed",
+      "value": 36
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 909
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 9
+    }
+  ]
+}

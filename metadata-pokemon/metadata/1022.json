@@ -1,0 +1,52 @@
+{
+  "name": "Iron-boulder #1022",
+  "description": "Rock-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/1022.png",
+  "external_url": "https://pokechain.io/pokemon/1022",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Rock"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "HP",
+      "value": 90
+    },
+    {
+      "trait_type": "Attack",
+      "value": 120
+    },
+    {
+      "trait_type": "Defense",
+      "value": 80
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 68
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 108
+    },
+    {
+      "trait_type": "Speed",
+      "value": 124
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 1022
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 9
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Hippopotas #449",
+  "description": "Ground-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/449.png",
+  "external_url": "https://pokechain.io/pokemon/449",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Ground"
+    },
+    {
+      "trait_type": "HP",
+      "value": 68
+    },
+    {
+      "trait_type": "Attack",
+      "value": 72
+    },
+    {
+      "trait_type": "Defense",
+      "value": 78
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 38
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 42
+    },
+    {
+      "trait_type": "Speed",
+      "value": 32
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 449
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}
