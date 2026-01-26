@@ -1,0 +1,260 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/tachi/Desktop/school/art-offchain-avenue-1/smart_contracts/hardhat/contracts/ERC721A/ERC721A.sol": {
+      "lastModificationDate": 1769441383083,
+      "contentHash": "3c360042f78bb01ea77c8cc3b201da93",
+      "sourceName": "contracts/ERC721A/ERC721A.sol",
+      "solcConfig": {
+        "version": "0.8.14",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC721A.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "ERC721A",
+        "ERC721A__IERC721Receiver"
+      ]
+    },
+    "/Users/tachi/Desktop/school/art-offchain-avenue-1/smart_contracts/hardhat/contracts/ERC721A/IERC721A.sol": {
+      "lastModificationDate": 1769441383083,
+      "contentHash": "1c2f42fcdcf15aa6af63e08860629eb1",
+      "sourceName": "contracts/ERC721A/IERC721A.sol",
+      "solcConfig": {
+        "version": "0.8.14",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "IERC721A"
+      ]
+    },
+    "/Users/tachi/Desktop/school/art-offchain-avenue-1/smart_contracts/hardhat/contracts/ProjectINO.sol": {
+      "lastModificationDate": 1769441383093,
+      "contentHash": "1e169f85e7ee33edef020d05d26657ab",
+      "sourceName": "contracts/ProjectINO.sol",
+      "solcConfig": {
+        "version": "0.8.14",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ERC721A/ERC721A.sol",
+        "./access/Ownable.sol",
+        "./utils/Strings.sol",
+        "./utils/cryptography/MerkleProof.sol"
+      ],
+      "versionPragmas": [
+        "0.8.14"
+      ],
+      "artifacts": [
+        "ProjectINO"
+      ]
+    },
+    "/Users/tachi/Desktop/school/art-offchain-avenue-1/smart_contracts/hardhat/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1769441383086,
+      "contentHash": "8398972af73b4e9e5ff3b31cad86234f",
+      "sourceName": "contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.14",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "/Users/tachi/Desktop/school/art-offchain-avenue-1/smart_contracts/hardhat/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1769441383090,
+      "contentHash": "9c54c6c065d9e590fdcdd72c451425b9",
+      "sourceName": "contracts/utils/Strings.sol",
+      "solcConfig": {
+        "version": "0.8.14",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Strings"
+      ]
+    },
+    "/Users/tachi/Desktop/school/art-offchain-avenue-1/smart_contracts/hardhat/contracts/utils/cryptography/MerkleProof.sol": {
+      "lastModificationDate": 1769441383089,
+      "contentHash": "8206339fb35134e364332d17ea7b5d60",
+      "sourceName": "contracts/utils/cryptography/MerkleProof.sol",
+      "solcConfig": {
+        "version": "0.8.14",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "MerkleProof"
+      ]
+    },
+    "/Users/tachi/Desktop/school/art-offchain-avenue-1/smart_contracts/hardhat/contracts/utils/Context.sol": {
+      "lastModificationDate": 1769441383090,
+      "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
+      "sourceName": "contracts/utils/Context.sol",
+      "solcConfig": {
+        "version": "0.8.14",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    }
+  }
+}
