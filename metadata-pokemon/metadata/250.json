@@ -1,0 +1,52 @@
+{
+  "name": "Ho-oh #250",
+  "description": "Fire-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/250.png",
+  "external_url": "https://pokechain.io/pokemon/250",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fire"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 106
+    },
+    {
+      "trait_type": "Attack",
+      "value": 130
+    },
+    {
+      "trait_type": "Defense",
+      "value": 90
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 110
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 154
+    },
+    {
+      "trait_type": "Speed",
+      "value": 90
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 250
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 2
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "Jumpluff #189",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/189.png",
+  "external_url": "https://pokechain.io/pokemon/189",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 75
+    },
+    {
+      "trait_type": "Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 95
+    },
+    {
+      "trait_type": "Speed",
+      "value": 110
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 189
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 2
+    }
+  ]
+}

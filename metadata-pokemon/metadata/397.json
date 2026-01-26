@@ -1,0 +1,52 @@
+{
+  "name": "Staravia #397",
+  "description": "Normal-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/397.png",
+  "external_url": "https://pokechain.io/pokemon/397",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 55
+    },
+    {
+      "trait_type": "Attack",
+      "value": 75
+    },
+    {
+      "trait_type": "Defense",
+      "value": 50
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Speed",
+      "value": 80
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 397
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

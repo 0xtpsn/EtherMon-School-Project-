@@ -1,0 +1,48 @@
+{
+  "name": "Melmetal #809",
+  "description": "Steel-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/809.png",
+  "external_url": "https://pokechain.io/pokemon/809",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "HP",
+      "value": 135
+    },
+    {
+      "trait_type": "Attack",
+      "value": 143
+    },
+    {
+      "trait_type": "Defense",
+      "value": 143
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 80
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Speed",
+      "value": 34
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 809
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

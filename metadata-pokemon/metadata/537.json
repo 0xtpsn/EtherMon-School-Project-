@@ -1,0 +1,52 @@
+{
+  "name": "Seismitoad #537",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/537.png",
+  "external_url": "https://pokechain.io/pokemon/537",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Ground"
+    },
+    {
+      "trait_type": "HP",
+      "value": 105
+    },
+    {
+      "trait_type": "Attack",
+      "value": 95
+    },
+    {
+      "trait_type": "Defense",
+      "value": 75
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 85
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 75
+    },
+    {
+      "trait_type": "Speed",
+      "value": 74
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 537
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

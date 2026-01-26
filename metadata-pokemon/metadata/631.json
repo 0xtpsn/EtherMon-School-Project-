@@ -1,0 +1,48 @@
+{
+  "name": "Heatmor #631",
+  "description": "Fire-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/631.png",
+  "external_url": "https://pokechain.io/pokemon/631",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fire"
+    },
+    {
+      "trait_type": "HP",
+      "value": 85
+    },
+    {
+      "trait_type": "Attack",
+      "value": 97
+    },
+    {
+      "trait_type": "Defense",
+      "value": 66
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 105
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 66
+    },
+    {
+      "trait_type": "Speed",
+      "value": 65
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 631
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

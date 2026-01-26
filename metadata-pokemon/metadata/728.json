@@ -1,0 +1,48 @@
+{
+  "name": "Popplio #728",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/728.png",
+  "external_url": "https://pokechain.io/pokemon/728",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 50
+    },
+    {
+      "trait_type": "Attack",
+      "value": 54
+    },
+    {
+      "trait_type": "Defense",
+      "value": 54
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 66
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 56
+    },
+    {
+      "trait_type": "Speed",
+      "value": 40
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 728
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

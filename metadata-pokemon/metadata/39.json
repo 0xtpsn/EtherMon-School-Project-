@@ -1,0 +1,52 @@
+{
+  "name": "Jigglypuff #39",
+  "description": "Normal-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/39.png",
+  "external_url": "https://pokechain.io/pokemon/39",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Fairy"
+    },
+    {
+      "trait_type": "HP",
+      "value": 115
+    },
+    {
+      "trait_type": "Attack",
+      "value": 45
+    },
+    {
+      "trait_type": "Defense",
+      "value": 20
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 45
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 25
+    },
+    {
+      "trait_type": "Speed",
+      "value": 20
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 39
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

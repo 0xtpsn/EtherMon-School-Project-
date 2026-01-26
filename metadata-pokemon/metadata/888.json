@@ -1,0 +1,48 @@
+{
+  "name": "Zacian #888",
+  "description": "Fairy-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/888.png",
+  "external_url": "https://pokechain.io/pokemon/888",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fairy"
+    },
+    {
+      "trait_type": "HP",
+      "value": 92
+    },
+    {
+      "trait_type": "Attack",
+      "value": 120
+    },
+    {
+      "trait_type": "Defense",
+      "value": 115
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 80
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 115
+    },
+    {
+      "trait_type": "Speed",
+      "value": 138
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 888
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

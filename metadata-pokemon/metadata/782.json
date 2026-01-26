@@ -1,0 +1,48 @@
+{
+  "name": "Jangmo-o #782",
+  "description": "Dragon-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/782.png",
+  "external_url": "https://pokechain.io/pokemon/782",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Dragon"
+    },
+    {
+      "trait_type": "HP",
+      "value": 45
+    },
+    {
+      "trait_type": "Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 45
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Speed",
+      "value": 45
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 782
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

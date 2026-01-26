@@ -1,0 +1,48 @@
+{
+  "name": "Hypno #97",
+  "description": "Psychic-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/97.png",
+  "external_url": "https://pokechain.io/pokemon/97",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "HP",
+      "value": 85
+    },
+    {
+      "trait_type": "Attack",
+      "value": 73
+    },
+    {
+      "trait_type": "Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 73
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 115
+    },
+    {
+      "trait_type": "Speed",
+      "value": 67
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 97
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

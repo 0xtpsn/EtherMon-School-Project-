@@ -1,0 +1,52 @@
+{
+  "name": "Blacephalon #806",
+  "description": "Fire-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/806.png",
+  "external_url": "https://pokechain.io/pokemon/806",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fire"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Ghost"
+    },
+    {
+      "trait_type": "HP",
+      "value": 53
+    },
+    {
+      "trait_type": "Attack",
+      "value": 127
+    },
+    {
+      "trait_type": "Defense",
+      "value": 53
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 151
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 79
+    },
+    {
+      "trait_type": "Speed",
+      "value": 107
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 806
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

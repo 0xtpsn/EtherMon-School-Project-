@@ -1,0 +1,52 @@
+{
+  "name": "Ferroseed #597",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/597.png",
+  "external_url": "https://pokechain.io/pokemon/597",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "HP",
+      "value": 44
+    },
+    {
+      "trait_type": "Attack",
+      "value": 50
+    },
+    {
+      "trait_type": "Defense",
+      "value": 91
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 24
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 86
+    },
+    {
+      "trait_type": "Speed",
+      "value": 10
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 597
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

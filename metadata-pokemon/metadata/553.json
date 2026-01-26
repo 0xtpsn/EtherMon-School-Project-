@@ -1,0 +1,52 @@
+{
+  "name": "Krookodile #553",
+  "description": "Ground-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/553.png",
+  "external_url": "https://pokechain.io/pokemon/553",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Ground"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Dark"
+    },
+    {
+      "trait_type": "HP",
+      "value": 95
+    },
+    {
+      "trait_type": "Attack",
+      "value": 117
+    },
+    {
+      "trait_type": "Defense",
+      "value": 80
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Speed",
+      "value": 92
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 553
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "Heliolisk #695",
+  "description": "Electric-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/695.png",
+  "external_url": "https://pokechain.io/pokemon/695",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Electric"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "HP",
+      "value": 62
+    },
+    {
+      "trait_type": "Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Defense",
+      "value": 52
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 109
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 94
+    },
+    {
+      "trait_type": "Speed",
+      "value": 109
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 695
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 6
+    }
+  ]
+}

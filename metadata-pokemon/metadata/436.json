@@ -1,0 +1,52 @@
+{
+  "name": "Bronzor #436",
+  "description": "Steel-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/436.png",
+  "external_url": "https://pokechain.io/pokemon/436",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "HP",
+      "value": 57
+    },
+    {
+      "trait_type": "Attack",
+      "value": 24
+    },
+    {
+      "trait_type": "Defense",
+      "value": 86
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 24
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 86
+    },
+    {
+      "trait_type": "Speed",
+      "value": 23
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 436
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

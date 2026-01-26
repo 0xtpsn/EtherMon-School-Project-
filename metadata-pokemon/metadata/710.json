@@ -1,0 +1,52 @@
+{
+  "name": "Pumpkaboo-average #710",
+  "description": "Ghost-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/710.png",
+  "external_url": "https://pokechain.io/pokemon/710",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Ghost"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "HP",
+      "value": 49
+    },
+    {
+      "trait_type": "Attack",
+      "value": 66
+    },
+    {
+      "trait_type": "Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 44
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 55
+    },
+    {
+      "trait_type": "Speed",
+      "value": 51
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 710
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 6
+    }
+  ]
+}

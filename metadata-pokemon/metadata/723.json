@@ -1,0 +1,52 @@
+{
+  "name": "Dartrix #723",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/723.png",
+  "external_url": "https://pokechain.io/pokemon/723",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 78
+    },
+    {
+      "trait_type": "Attack",
+      "value": 75
+    },
+    {
+      "trait_type": "Defense",
+      "value": 75
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 70
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Speed",
+      "value": 52
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 723
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

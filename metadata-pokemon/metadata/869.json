@@ -1,0 +1,48 @@
+{
+  "name": "Alcremie #869",
+  "description": "Fairy-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/869.png",
+  "external_url": "https://pokechain.io/pokemon/869",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fairy"
+    },
+    {
+      "trait_type": "HP",
+      "value": 65
+    },
+    {
+      "trait_type": "Attack",
+      "value": 60
+    },
+    {
+      "trait_type": "Defense",
+      "value": 75
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 110
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 121
+    },
+    {
+      "trait_type": "Speed",
+      "value": 64
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 869
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

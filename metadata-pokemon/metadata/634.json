@@ -1,0 +1,52 @@
+{
+  "name": "Zweilous #634",
+  "description": "Dark-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/634.png",
+  "external_url": "https://pokechain.io/pokemon/634",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Dark"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Dragon"
+    },
+    {
+      "trait_type": "HP",
+      "value": 72
+    },
+    {
+      "trait_type": "Attack",
+      "value": 85
+    },
+    {
+      "trait_type": "Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Speed",
+      "value": 58
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 634
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

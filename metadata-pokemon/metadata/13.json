@@ -1,0 +1,52 @@
+{
+  "name": "Weedle #13",
+  "description": "Bug-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/13.png",
+  "external_url": "https://pokechain.io/pokemon/13",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Bug"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Poison"
+    },
+    {
+      "trait_type": "HP",
+      "value": 40
+    },
+    {
+      "trait_type": "Attack",
+      "value": 35
+    },
+    {
+      "trait_type": "Defense",
+      "value": 30
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 20
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 20
+    },
+    {
+      "trait_type": "Speed",
+      "value": 50
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 13
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

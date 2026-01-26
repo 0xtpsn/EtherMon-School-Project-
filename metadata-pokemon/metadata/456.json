@@ -1,0 +1,48 @@
+{
+  "name": "Finneon #456",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/456.png",
+  "external_url": "https://pokechain.io/pokemon/456",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 49
+    },
+    {
+      "trait_type": "Attack",
+      "value": 49
+    },
+    {
+      "trait_type": "Defense",
+      "value": 56
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 49
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 61
+    },
+    {
+      "trait_type": "Speed",
+      "value": 66
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 456
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

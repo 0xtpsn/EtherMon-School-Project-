@@ -1,0 +1,48 @@
+{
+  "name": "Buneary #427",
+  "description": "Normal-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/427.png",
+  "external_url": "https://pokechain.io/pokemon/427",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "HP",
+      "value": 55
+    },
+    {
+      "trait_type": "Attack",
+      "value": 66
+    },
+    {
+      "trait_type": "Defense",
+      "value": 44
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 44
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 56
+    },
+    {
+      "trait_type": "Speed",
+      "value": 85
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 427
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

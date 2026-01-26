@@ -1,0 +1,52 @@
+{
+  "name": "Wormadam-plant #413",
+  "description": "Bug-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/413.png",
+  "external_url": "https://pokechain.io/pokemon/413",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Bug"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "HP",
+      "value": 60
+    },
+    {
+      "trait_type": "Attack",
+      "value": 59
+    },
+    {
+      "trait_type": "Defense",
+      "value": 85
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 79
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 105
+    },
+    {
+      "trait_type": "Speed",
+      "value": 36
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 413
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

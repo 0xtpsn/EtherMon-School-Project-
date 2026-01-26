@@ -1,0 +1,48 @@
+{
+  "name": "Rattata #19",
+  "description": "Normal-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/19.png",
+  "external_url": "https://pokechain.io/pokemon/19",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "HP",
+      "value": 30
+    },
+    {
+      "trait_type": "Attack",
+      "value": 56
+    },
+    {
+      "trait_type": "Defense",
+      "value": 35
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 25
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 35
+    },
+    {
+      "trait_type": "Speed",
+      "value": 72
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 19
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

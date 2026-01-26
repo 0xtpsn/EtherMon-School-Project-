@@ -1,0 +1,48 @@
+{
+  "name": "Necrozma #800",
+  "description": "Psychic-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/800.png",
+  "external_url": "https://pokechain.io/pokemon/800",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "HP",
+      "value": 97
+    },
+    {
+      "trait_type": "Attack",
+      "value": 107
+    },
+    {
+      "trait_type": "Defense",
+      "value": 101
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 127
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 89
+    },
+    {
+      "trait_type": "Speed",
+      "value": 79
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 800
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

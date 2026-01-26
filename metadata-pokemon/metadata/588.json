@@ -1,0 +1,48 @@
+{
+  "name": "Karrablast #588",
+  "description": "Bug-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/588.png",
+  "external_url": "https://pokechain.io/pokemon/588",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Bug"
+    },
+    {
+      "trait_type": "HP",
+      "value": 50
+    },
+    {
+      "trait_type": "Attack",
+      "value": 75
+    },
+    {
+      "trait_type": "Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Speed",
+      "value": 60
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 588
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

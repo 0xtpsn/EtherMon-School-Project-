@@ -1,0 +1,48 @@
+{
+  "name": "Wailord #321",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/321.png",
+  "external_url": "https://pokechain.io/pokemon/321",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "HP",
+      "value": 170
+    },
+    {
+      "trait_type": "Attack",
+      "value": 90
+    },
+    {
+      "trait_type": "Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 90
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Speed",
+      "value": 60
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 321
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 3
+    }
+  ]
+}

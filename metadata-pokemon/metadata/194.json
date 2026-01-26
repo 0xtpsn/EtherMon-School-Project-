@@ -1,0 +1,52 @@
+{
+  "name": "Wooper #194",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/194.png",
+  "external_url": "https://pokechain.io/pokemon/194",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Ground"
+    },
+    {
+      "trait_type": "HP",
+      "value": 55
+    },
+    {
+      "trait_type": "Attack",
+      "value": 45
+    },
+    {
+      "trait_type": "Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 25
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 25
+    },
+    {
+      "trait_type": "Speed",
+      "value": 15
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 194
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 2
+    }
+  ]
+}

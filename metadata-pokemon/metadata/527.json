@@ -1,0 +1,52 @@
+{
+  "name": "Woobat #527",
+  "description": "Psychic-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/527.png",
+  "external_url": "https://pokechain.io/pokemon/527",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Psychic"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 65
+    },
+    {
+      "trait_type": "Attack",
+      "value": 45
+    },
+    {
+      "trait_type": "Defense",
+      "value": 43
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 43
+    },
+    {
+      "trait_type": "Speed",
+      "value": 72
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 527
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Togepi #175",
+  "description": "Fairy-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/175.png",
+  "external_url": "https://pokechain.io/pokemon/175",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fairy"
+    },
+    {
+      "trait_type": "HP",
+      "value": 35
+    },
+    {
+      "trait_type": "Attack",
+      "value": 20
+    },
+    {
+      "trait_type": "Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Speed",
+      "value": 20
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 175
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 2
+    }
+  ]
+}

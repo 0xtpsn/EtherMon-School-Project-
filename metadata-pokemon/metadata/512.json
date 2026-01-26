@@ -1,0 +1,48 @@
+{
+  "name": "Simisage #512",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/512.png",
+  "external_url": "https://pokechain.io/pokemon/512",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "HP",
+      "value": 75
+    },
+    {
+      "trait_type": "Attack",
+      "value": 98
+    },
+    {
+      "trait_type": "Defense",
+      "value": 63
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 98
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 63
+    },
+    {
+      "trait_type": "Speed",
+      "value": 101
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 512
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

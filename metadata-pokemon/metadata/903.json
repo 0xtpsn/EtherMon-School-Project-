@@ -1,0 +1,52 @@
+{
+  "name": "Sneasler #903",
+  "description": "Fighting-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/903.png",
+  "external_url": "https://pokechain.io/pokemon/903",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Fighting"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Poison"
+    },
+    {
+      "trait_type": "HP",
+      "value": 80
+    },
+    {
+      "trait_type": "Attack",
+      "value": 130
+    },
+    {
+      "trait_type": "Defense",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 80
+    },
+    {
+      "trait_type": "Speed",
+      "value": 120
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 903
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

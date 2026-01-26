@@ -1,0 +1,48 @@
+{
+  "name": "Silcoon #266",
+  "description": "Bug-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/266.png",
+  "external_url": "https://pokechain.io/pokemon/266",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Bug"
+    },
+    {
+      "trait_type": "HP",
+      "value": 50
+    },
+    {
+      "trait_type": "Attack",
+      "value": 35
+    },
+    {
+      "trait_type": "Defense",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 25
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 25
+    },
+    {
+      "trait_type": "Speed",
+      "value": 15
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 266
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 3
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "name": "Dolliv #929",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/929.png",
+  "external_url": "https://pokechain.io/pokemon/929",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "HP",
+      "value": 52
+    },
+    {
+      "trait_type": "Attack",
+      "value": 53
+    },
+    {
+      "trait_type": "Defense",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 78
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 78
+    },
+    {
+      "trait_type": "Speed",
+      "value": 33
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 929
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 9
+    }
+  ]
+}

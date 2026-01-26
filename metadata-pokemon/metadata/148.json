@@ -1,0 +1,48 @@
+{
+  "name": "Dragonair #148",
+  "description": "Dragon-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/148.png",
+  "external_url": "https://pokechain.io/pokemon/148",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Dragon"
+    },
+    {
+      "trait_type": "HP",
+      "value": 61
+    },
+    {
+      "trait_type": "Attack",
+      "value": 84
+    },
+    {
+      "trait_type": "Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 70
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 70
+    },
+    {
+      "trait_type": "Speed",
+      "value": 70
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 148
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

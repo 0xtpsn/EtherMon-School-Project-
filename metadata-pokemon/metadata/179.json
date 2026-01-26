@@ -1,0 +1,48 @@
+{
+  "name": "Mareep #179",
+  "description": "Electric-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/179.png",
+  "external_url": "https://pokechain.io/pokemon/179",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Electric"
+    },
+    {
+      "trait_type": "HP",
+      "value": 55
+    },
+    {
+      "trait_type": "Attack",
+      "value": 40
+    },
+    {
+      "trait_type": "Defense",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 45
+    },
+    {
+      "trait_type": "Speed",
+      "value": 35
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 179
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 2
+    }
+  ]
+}

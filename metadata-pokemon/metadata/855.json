@@ -1,0 +1,48 @@
+{
+  "name": "Polteageist #855",
+  "description": "Ghost-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/855.png",
+  "external_url": "https://pokechain.io/pokemon/855",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Ghost"
+    },
+    {
+      "trait_type": "HP",
+      "value": 60
+    },
+    {
+      "trait_type": "Attack",
+      "value": 65
+    },
+    {
+      "trait_type": "Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 134
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 114
+    },
+    {
+      "trait_type": "Speed",
+      "value": 70
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 855
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 8
+    }
+  ]
+}

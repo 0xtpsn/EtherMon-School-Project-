@@ -1,0 +1,52 @@
+{
+  "name": "Aerodactyl #142",
+  "description": "Rock-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/142.png",
+  "external_url": "https://pokechain.io/pokemon/142",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Rock"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Flying"
+    },
+    {
+      "trait_type": "HP",
+      "value": 80
+    },
+    {
+      "trait_type": "Attack",
+      "value": 105
+    },
+    {
+      "trait_type": "Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 75
+    },
+    {
+      "trait_type": "Speed",
+      "value": 130
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 142
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Luxio #404",
+  "description": "Electric-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/404.png",
+  "external_url": "https://pokechain.io/pokemon/404",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Electric"
+    },
+    {
+      "trait_type": "HP",
+      "value": 60
+    },
+    {
+      "trait_type": "Attack",
+      "value": 85
+    },
+    {
+      "trait_type": "Defense",
+      "value": 49
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 49
+    },
+    {
+      "trait_type": "Speed",
+      "value": 60
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 404
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Uncommon"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 4
+    }
+  ]
+}

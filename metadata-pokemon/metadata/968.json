@@ -1,0 +1,48 @@
+{
+  "name": "Orthworm #968",
+  "description": "Steel-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/968.png",
+  "external_url": "https://pokechain.io/pokemon/968",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "HP",
+      "value": 70
+    },
+    {
+      "trait_type": "Attack",
+      "value": 85
+    },
+    {
+      "trait_type": "Defense",
+      "value": 145
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 60
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 55
+    },
+    {
+      "trait_type": "Speed",
+      "value": 65
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 968
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 9
+    }
+  ]
+}

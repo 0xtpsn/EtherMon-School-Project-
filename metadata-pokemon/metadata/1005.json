@@ -1,0 +1,52 @@
+{
+  "name": "Roaring-moon #1005",
+  "description": "Dragon-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/1005.png",
+  "external_url": "https://pokechain.io/pokemon/1005",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Dragon"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Dark"
+    },
+    {
+      "trait_type": "HP",
+      "value": 105
+    },
+    {
+      "trait_type": "Attack",
+      "value": 139
+    },
+    {
+      "trait_type": "Defense",
+      "value": 71
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 101
+    },
+    {
+      "trait_type": "Speed",
+      "value": 119
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 1005
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Legendary"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 9
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "name": "Whismur #293",
+  "description": "Normal-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/293.png",
+  "external_url": "https://pokechain.io/pokemon/293",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Normal"
+    },
+    {
+      "trait_type": "HP",
+      "value": 64
+    },
+    {
+      "trait_type": "Attack",
+      "value": 51
+    },
+    {
+      "trait_type": "Defense",
+      "value": 23
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 51
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 23
+    },
+    {
+      "trait_type": "Speed",
+      "value": 28
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 293
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 3
+    }
+  ]
+}

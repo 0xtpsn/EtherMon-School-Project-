@@ -1,0 +1,52 @@
+{
+  "name": "Golem #76",
+  "description": "Rock-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/76.png",
+  "external_url": "https://pokechain.io/pokemon/76",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Rock"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Ground"
+    },
+    {
+      "trait_type": "HP",
+      "value": 80
+    },
+    {
+      "trait_type": "Attack",
+      "value": 120
+    },
+    {
+      "trait_type": "Defense",
+      "value": 130
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 55
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Speed",
+      "value": 45
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 76
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 1
+    }
+  ]
+}

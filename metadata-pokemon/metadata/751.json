@@ -1,0 +1,52 @@
+{
+  "name": "Dewpider #751",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/751.png",
+  "external_url": "https://pokechain.io/pokemon/751",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Bug"
+    },
+    {
+      "trait_type": "HP",
+      "value": 38
+    },
+    {
+      "trait_type": "Attack",
+      "value": 40
+    },
+    {
+      "trait_type": "Defense",
+      "value": 52
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 40
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 72
+    },
+    {
+      "trait_type": "Speed",
+      "value": 27
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 751
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 7
+    }
+  ]
+}

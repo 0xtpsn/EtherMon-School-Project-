@@ -1,0 +1,52 @@
+{
+  "name": "Ferrothorn #598",
+  "description": "Grass-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/598.png",
+  "external_url": "https://pokechain.io/pokemon/598",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Grass"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Steel"
+    },
+    {
+      "trait_type": "HP",
+      "value": 74
+    },
+    {
+      "trait_type": "Attack",
+      "value": 94
+    },
+    {
+      "trait_type": "Defense",
+      "value": 131
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 54
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 116
+    },
+    {
+      "trait_type": "Speed",
+      "value": 20
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 598
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}

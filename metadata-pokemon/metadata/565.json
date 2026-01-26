@@ -1,0 +1,52 @@
+{
+  "name": "Carracosta #565",
+  "description": "Water-type Pokemon from the Pokechain Collection. Catch, trade, and battle!",
+  "image": "https://bafybeiffqjpsyrwztgockxr43nkgw4sc3llpxgt3tmqdblgh4shajeccvm.ipfs.dweb.link/565.png",
+  "external_url": "https://pokechain.io/pokemon/565",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Water"
+    },
+    {
+      "trait_type": "Secondary Type",
+      "value": "Rock"
+    },
+    {
+      "trait_type": "HP",
+      "value": 74
+    },
+    {
+      "trait_type": "Attack",
+      "value": 108
+    },
+    {
+      "trait_type": "Defense",
+      "value": 133
+    },
+    {
+      "trait_type": "Sp. Attack",
+      "value": 83
+    },
+    {
+      "trait_type": "Sp. Defense",
+      "value": 65
+    },
+    {
+      "trait_type": "Speed",
+      "value": 32
+    },
+    {
+      "trait_type": "Pokedex",
+      "value": 565
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Generation",
+      "value": 5
+    }
+  ]
+}
