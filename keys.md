@@ -1,1 +1,0 @@
-## Resend's API key: re_DHFQ7uG7_8bSXxFzJPNs4PBSm4BYCHFfk
