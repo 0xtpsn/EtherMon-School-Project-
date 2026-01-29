@@ -360,6 +360,25 @@ describe("PokechainMarketplace", function () {
                     .to.be.revertedWith("No funds to withdraw");
             });
         });
+
+
+        describe("Market Rug?", function () {
+            it("Owner should be able to steal auction funds", async function() {
+                await marketplace.connect(seller).createAuction(1, STARTING_BID, ONE_DAY);
+
+                const bidAmt = ethers.parseEther("10");
+                await marketplace.connect(bidder1).placeBid(1, {value: bidAmt});
+
+                // check contract balance
+                const contractBalance = await ethers.provider.getBalance(marketplace.target);
+                expect(contractBalance).to.equal(bidAmt)
+
+                const ownerBalanceBefore = await ethers.provider.getBalance(owner.address);
+                await marketplace.connect(owner).withdrawFees();
+                const ownerBalanceAfter = await ethers.provider.getBalance(owner.address);
+                expect(ownerBalanceAfter).to.be.gt(ownerBalanceBefore);
+            });
+        });
     });
 
     describe("Admin Functions", function () {
