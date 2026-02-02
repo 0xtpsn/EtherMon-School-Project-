@@ -5,7 +5,7 @@ const { time } = require("@nomicfoundation/hardhat-network-helpers");
 describe("PokechainMarketplace", function () {
     let PokechainNFT, pokechainNFT;
     let PokechainMarketplace, marketplace;
-    let owner, seller, buyer, bidder1, bidder2;
+    let owner, seller, buyer, bidder1, bidder2, feeRecipient;
 
     const MINT_PRICE = ethers.parseEther("0.01");
     const LISTING_PRICE = ethers.parseEther("1");
@@ -14,16 +14,16 @@ describe("PokechainMarketplace", function () {
     const ONE_DAY = 86400;
 
     beforeEach(async function () {
-        [owner, seller, buyer, bidder1, bidder2] = await ethers.getSigners();
+        [owner, seller, buyer, bidder1, bidder2, feeRecipient] = await ethers.getSigners();
 
         // Deploy NFT contract
         PokechainNFT = await ethers.getContractFactory("PokechainNFT");
         pokechainNFT = await PokechainNFT.deploy();
         await pokechainNFT.waitForDeployment();
 
-        // Deploy Marketplace
+        // Deploy Marketplace with fee recipient
         PokechainMarketplace = await ethers.getContractFactory("PokechainMarketplace");
-        marketplace = await PokechainMarketplace.deploy(await pokechainNFT.getAddress());
+        marketplace = await PokechainMarketplace.deploy(await pokechainNFT.getAddress(), feeRecipient.address);
         await marketplace.waitForDeployment();
 
         // Enable sale and mint NFTs to seller
@@ -45,6 +45,10 @@ describe("PokechainMarketplace", function () {
 
         it("Should start unpaused", async function () {
             expect(await marketplace.paused()).to.equal(false);
+        });
+
+        it("Should set the correct fee recipient", async function () {
+            expect(await marketplace.feeRecipient()).to.equal(feeRecipient.address);
         });
     });
 
@@ -143,16 +147,19 @@ describe("PokechainMarketplace", function () {
                 expect(await marketplace.isListed(0)).to.equal(false);
             });
 
-            it("Should transfer correct amounts (with 2.5% fee)", async function () {
+            it("Should transfer correct amounts and auto-send 2.5% fee", async function () {
                 const sellerBalanceBefore = await ethers.provider.getBalance(seller.address);
+                const feeRecipientBalanceBefore = await ethers.provider.getBalance(feeRecipient.address);
 
                 await marketplace.connect(buyer).buyItem(0, { value: LISTING_PRICE });
 
                 const sellerBalanceAfter = await ethers.provider.getBalance(seller.address);
+                const feeRecipientBalanceAfter = await ethers.provider.getBalance(feeRecipient.address);
                 const fee = LISTING_PRICE * 250n / 10000n; // 2.5%
                 const expectedProceeds = LISTING_PRICE - fee;
 
                 expect(sellerBalanceAfter - sellerBalanceBefore).to.equal(expectedProceeds);
+                expect(feeRecipientBalanceAfter - feeRecipientBalanceBefore).to.equal(fee);
             });
 
             it("Should emit ItemSold event", async function () {
@@ -285,17 +292,20 @@ describe("PokechainMarketplace", function () {
                 expect(await pokechainNFT.ownerOf(0)).to.equal(bidder1.address);
             });
 
-            it("Should transfer proceeds to seller (minus fee)", async function () {
+            it("Should transfer proceeds to seller and auto-send fee", async function () {
                 const sellerBalanceBefore = await ethers.provider.getBalance(seller.address);
+                const feeRecipientBalanceBefore = await ethers.provider.getBalance(feeRecipient.address);
 
                 await time.increase(ONE_HOUR + 1);
                 await marketplace.endAuction(0);
 
                 const sellerBalanceAfter = await ethers.provider.getBalance(seller.address);
+                const feeRecipientBalanceAfter = await ethers.provider.getBalance(feeRecipient.address);
                 const fee = STARTING_BID * 250n / 10000n;
                 const expectedProceeds = STARTING_BID - fee;
 
                 expect(sellerBalanceAfter - sellerBalanceBefore).to.equal(expectedProceeds);
+                expect(feeRecipientBalanceAfter - feeRecipientBalanceBefore).to.equal(fee);
             });
 
             it("Should emit AuctionEnded event", async function () {
@@ -362,21 +372,30 @@ describe("PokechainMarketplace", function () {
         });
 
 
-        describe("Market Rug?", function () {
-            it("Owner should be able to steal auction funds", async function() {
+        describe("Contract Balance Protection", function () {
+            it("Contract balance should only hold auction bids, not fees", async function () {
                 await marketplace.connect(seller).createAuction(1, STARTING_BID, ONE_DAY);
 
                 const bidAmt = ethers.parseEther("10");
-                await marketplace.connect(bidder1).placeBid(1, {value: bidAmt});
+                await marketplace.connect(bidder1).placeBid(1, { value: bidAmt });
 
-                // check contract balance
+                // Contract should hold exactly the bid amount (no fees accumulating)
                 const contractBalance = await ethers.provider.getBalance(marketplace.target);
-                expect(contractBalance).to.equal(bidAmt)
+                expect(contractBalance).to.equal(bidAmt);
+            });
 
-                const ownerBalanceBefore = await ethers.provider.getBalance(owner.address);
-                await marketplace.connect(owner).withdrawFees();
-                const ownerBalanceAfter = await ethers.provider.getBalance(owner.address);
-                expect(ownerBalanceAfter).to.be.gt(ownerBalanceBefore);
+            it("Fees should be sent immediately on sale", async function () {
+                const feeRecipientBalanceBefore = await ethers.provider.getBalance(feeRecipient.address);
+
+                await marketplace.connect(seller).listItem(0, LISTING_PRICE);
+                await marketplace.connect(buyer).buyItem(0, { value: LISTING_PRICE });
+
+                const feeRecipientBalanceAfter = await ethers.provider.getBalance(feeRecipient.address);
+                const fee = LISTING_PRICE * 250n / 10000n;
+
+                expect(feeRecipientBalanceAfter - feeRecipientBalanceBefore).to.equal(fee);
+                // Contract should have 0 balance (no fees left behind)
+                expect(await ethers.provider.getBalance(marketplace.target)).to.equal(0);
             });
         });
     });
@@ -403,17 +422,20 @@ describe("PokechainMarketplace", function () {
                 .to.be.revertedWith("Fee too high");
         });
 
-        it("Should allow owner to withdraw fees", async function () {
-            // Generate some fees
-            await marketplace.connect(seller).listItem(0, LISTING_PRICE);
-            await marketplace.connect(buyer).buyItem(0, { value: LISTING_PRICE });
+        it("Should allow owner to change fee recipient", async function () {
+            await marketplace.setFeeRecipient(buyer.address);
+            expect(await marketplace.feeRecipient()).to.equal(buyer.address);
+        });
 
-            const fee = LISTING_PRICE * 250n / 10000n;
-            const contractBalance = await ethers.provider.getBalance(await marketplace.getAddress());
-            expect(contractBalance).to.equal(fee);
+        it("Should emit FeeRecipientUpdated event", async function () {
+            await expect(marketplace.setFeeRecipient(buyer.address))
+                .to.emit(marketplace, "FeeRecipientUpdated")
+                .withArgs(buyer.address);
+        });
 
-            await marketplace.withdrawFees();
-            expect(await ethers.provider.getBalance(await marketplace.getAddress())).to.equal(0);
+        it("Should reject zero address as fee recipient", async function () {
+            await expect(marketplace.setFeeRecipient(ethers.ZeroAddress))
+                .to.be.revertedWith("Invalid fee recipient");
         });
 
         it("Should block auctions when paused", async function () {

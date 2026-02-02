@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.14;
+pragma solidity 0.8.28;
 
 import "./utils/ReentrancyGuard.sol";
 import "./access/Ownable.sol";
@@ -35,7 +35,7 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
     
     uint256 public platformFeeBps = 250; // 2.5% default (in basis points)
     uint256 public constant MAX_FEE_BPS = 1000; // Max 10%
-    uint256 public accumulatedFees;
+    address public feeRecipient; // Address that receives platform fees automatically
     
     bool public paused = false;
 
@@ -90,14 +90,18 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
     event FundsWithdrawn(address indexed user, uint256 amount);
     event PlatformFeeUpdated(uint256 newFeeBps);
     event MarketplacePaused(bool isPaused);
+    event FeeRecipientUpdated(address indexed newRecipient);
+    event FeeSent(address indexed recipient, uint256 amount);
 
     /*///////////////////////////////////////////////////////////////
                             CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address _nftContract) {
+    constructor(address _nftContract, address _feeRecipient) {
         require(_nftContract != address(0), "Invalid NFT contract address");
+        require(_feeRecipient != address(0), "Invalid fee recipient address");
         nftContract = IERC721(_nftContract);
+        feeRecipient = _feeRecipient;
     }
 
     /*///////////////////////////////////////////////////////////////
@@ -191,10 +195,16 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
         // Clear listing before transfers (reentrancy protection)
         delete listings[tokenId];
 
-        // Calculate fees
+        // Calculate and send fees directly to fee recipient
         uint256 fee = (listing.price * platformFeeBps) / 10000;
-        accumulatedFees += fee;
         uint256 sellerProceeds = listing.price - fee;
+
+        // Send fee immediately to fee recipient
+        if (fee > 0) {
+            (bool feeSuccess, ) = payable(feeRecipient).call{value: fee}("");
+            require(feeSuccess, "Fee transfer failed");
+            emit FeeSent(feeRecipient, fee);
+        }
 
         // Transfer NFT to buyer
         nftContract.transferFrom(listing.seller, msg.sender, tokenId);
@@ -297,10 +307,16 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
         auction.active = false;
 
         if (auction.highestBidder != address(0)) {
-            // Calculate fees
+            // Calculate and send fees directly to fee recipient
             uint256 fee = (auction.highestBid * platformFeeBps) / 10000;
-            accumulatedFees += fee;
             uint256 sellerProceeds = auction.highestBid - fee;
+
+            // Send fee immediately to fee recipient
+            if (fee > 0) {
+                (bool feeSuccess, ) = payable(feeRecipient).call{value: fee}("");
+                require(feeSuccess, "Fee transfer failed");
+                emit FeeSent(feeRecipient, fee);
+            }
 
             // Transfer NFT to winner
             nftContract.transferFrom(auction.seller, auction.highestBidder, tokenId);
@@ -369,19 +385,14 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
     }
 
     /**
-     * @dev Withdraw accumulated platform fees
+     * @dev Update the fee recipient address
+     * @param newRecipient New address to receive platform fees
      */
-    function withdrawFees() external onlyOwner nonReentrant {
-        uint256 balance = accumulatedFees;
-        require(balance > 0, "No fees to withdraw");
-        accumulatedFees = 0;
-
-        (bool success, ) = payable(owner()).call{value: balance}("");
-        require(success, "Withdraw failed");
-
-        emit FundsWithdrawn(owner(), balance);
+    function setFeeRecipient(address newRecipient) external onlyOwner {
+        require(newRecipient != address(0), "Invalid fee recipient");
+        feeRecipient = newRecipient;
+        emit FeeRecipientUpdated(newRecipient);
     }
-    // TODO: think there is a large bug here
 
     /*///////////////////////////////////////////////////////////////
                           VIEW FUNCTIONS

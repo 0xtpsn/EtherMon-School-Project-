@@ -2,7 +2,7 @@
 // ERC721A Contracts v4.0.0
 // Creator: Chiru Labs
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.28;
 
 /**
  * @dev Interface of an ERC721A compliant contract.

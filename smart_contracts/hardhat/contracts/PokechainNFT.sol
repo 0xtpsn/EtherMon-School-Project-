@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.14;
+pragma solidity 0.8.28;
 
 import "./ERC721A/ERC721A.sol";
 import "./access/Ownable.sol";
@@ -111,7 +111,7 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
     function _randomPokemonId(uint256 tokenId) internal view returns (uint256) {
         uint256 random = uint256(keccak256(abi.encodePacked(
             block.timestamp,
-            block.difficulty,  // Note: Use block.prevrandao for Solidity 0.8.18+
+            block.prevrandao,
             msg.sender,
             tokenId,
             totalSupply()
