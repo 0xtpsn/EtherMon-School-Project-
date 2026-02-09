@@ -8,6 +8,7 @@ export interface ApiUser {
   display_name?: string;
   avatar_url?: string | null;
   bio?: string | null;
+  wallet_address?: string | null;
 }
 
 export interface AuctionSummary {

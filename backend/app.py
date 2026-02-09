@@ -42,7 +42,8 @@ PROFILE_COLUMNS = (
     "id, username, email, role, display_name, bio, avatar_url, banner_url, "
     "twitter_handle, instagram_handle, website_url, contact_email, show_contact_email, "
     "notification_email, notification_bid, notification_sale, notification_like, "
-    "notification_watchlist_outbid, notification_watchlist_ending, notification_auction_sold"
+    "notification_watchlist_outbid, notification_watchlist_ending, notification_auction_sold, "
+    "wallet_address"
 )
 
 # Initialize services
@@ -837,6 +838,8 @@ def create_app() -> Flask:
             user_row = fetch_profile(g.db, "id", int(identifier))
         if not user_row:
             user_row = fetch_profile(g.db, "username", identifier)
+        if not user_row and identifier.startswith("0x"):
+            user_row = fetch_profile(g.db, "wallet_address", identifier.lower())
         if not user_row:
             logger.warning(f"Profile not found for identifier: {identifier}")
             return jsonify({"error": "Profile not found"}), 404
@@ -947,6 +950,65 @@ def create_app() -> Flask:
             logger.error(f"Error building profile response: {str(e)}", exc_info=True)
             return jsonify({"error": "Failed to load profile data"}), 500
 
+    # WALLET-BASED PROFILE UPDATE  -----------------------------------------------
+    @app.put("/api/profiles/wallet/<string:wallet_address>")
+    def update_profile_by_wallet(wallet_address: str):
+        """Update or create a profile for a wallet address (no session required)."""
+        wallet = wallet_address.lower()
+        data = request.get_json() or {}
+
+        allowed_fields = [
+            "display_name", "bio", "avatar_url", "banner_url",
+            "twitter_handle", "instagram_handle", "website_url",
+        ]
+        updates = {field: data[field] for field in allowed_fields if field in data}
+        if not updates:
+            return jsonify({"error": "No fields to update"}), 400
+
+        try:
+            # Check if user with this wallet exists
+            user_row = g.db.execute(
+                "SELECT id FROM users WHERE LOWER(wallet_address) = ?",
+                (wallet,),
+            ).fetchone()
+
+            if user_row:
+                # Update existing user
+                user_id = user_row["id"]
+                placeholders = ", ".join(f"{field} = ?" for field in updates.keys())
+                values = list(updates.values())
+                values.append(user_id)
+                g.db.execute(
+                    f"UPDATE users SET {placeholders}, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                    values,
+                )
+            else:
+                # Create new user for this wallet
+                short_addr = f"{wallet[:6]}...{wallet[-4:]}"
+                updates["wallet_address"] = wallet
+                updates["username"] = short_addr
+                updates["email"] = f"{wallet}@wallet.local"
+                updates["role"] = "buyer"
+                columns = ", ".join(updates.keys())
+                qmarks = ", ".join("?" * len(updates))
+                g.db.execute(
+                    f"INSERT INTO users ({columns}) VALUES ({qmarks})",
+                    list(updates.values()),
+                )
+
+            g.db.commit()
+
+            # Return the updated/created profile
+            row = g.db.execute(
+                f"SELECT {PROFILE_COLUMNS} FROM users WHERE LOWER(wallet_address) = ?",
+                (wallet,),
+            ).fetchone()
+            return jsonify({"status": "updated", "profile": row_to_dict(row) if row else {}})
+        except Exception as exc:
+            g.db.rollback()
+            logger.error(f"Error updating wallet profile: {str(exc)}", exc_info=True)
+            return jsonify({"error": str(exc)}), 400
+
     # NOTIFICATIONS ----------------------------------------------------------
     @app.get("/api/notifications")
     @require_auth()
@@ -997,6 +1059,202 @@ def create_app() -> Flask:
         g.db.execute(
             "UPDATE notifications SET is_read = 1 WHERE user_id = ?",
             (session["user_id"],),
+        )
+        g.db.commit()
+        return jsonify({"status": "updated"})
+
+    # NFT LIKES ---------------------------------------------------------------
+    @app.post("/api/nfts/<int:token_id>/like")
+    def like_nft(token_id: int):
+        """Like an NFT - creates a like record and notifies the owner."""
+        data = request.get_json() or {}
+        liker_wallet = data.get("liker_wallet", "").lower()
+        owner_wallet = data.get("owner_wallet", "").lower()
+        
+        if not liker_wallet or not owner_wallet:
+            return jsonify({"error": "liker_wallet and owner_wallet required"}), 400
+        
+        # Don't allow liking your own NFT
+        if liker_wallet == owner_wallet:
+            return jsonify({"error": "Cannot like your own NFT"}), 400
+        
+        try:
+            # Insert like record
+            g.db.execute(
+                """
+                INSERT INTO nft_likes (token_id, owner_wallet, liker_wallet)
+                VALUES (?, ?, ?)
+                """,
+                (token_id, owner_wallet, liker_wallet),
+            )
+            
+            # Find the owner's user_id if they have an account
+            owner_row = g.db.execute(
+                "SELECT id FROM users WHERE LOWER(wallet_address) = ?",
+                (owner_wallet,),
+            ).fetchone()
+            
+            if owner_row:
+                # Create notification for the owner
+                g.db.execute(
+                    """
+                    INSERT INTO notifications (user_id, title, message, token_id, from_wallet)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        owner_row["id"],
+                        "Someone liked your NFT! ❤️",
+                        f"A collector liked your NFT #{token_id}",
+                        token_id,
+                        liker_wallet,
+                    ),
+                )
+            
+            g.db.commit()
+            return jsonify({"status": "liked"})
+        except Exception as e:
+            if "UNIQUE constraint failed" in str(e):
+                return jsonify({"status": "already_liked"})
+            return jsonify({"error": str(e)}), 500
+    
+    @app.delete("/api/nfts/<int:token_id>/like")
+    def unlike_nft(token_id: int):
+        """Remove a like from an NFT."""
+        liker_wallet = request.args.get("liker_wallet", "").lower()
+        
+        if not liker_wallet:
+            return jsonify({"error": "liker_wallet required"}), 400
+        
+        g.db.execute(
+            "DELETE FROM nft_likes WHERE token_id = ? AND liker_wallet = ?",
+            (token_id, liker_wallet),
+        )
+        g.db.commit()
+        return jsonify({"status": "unliked"})
+    
+    @app.get("/api/nfts/<int:token_id>/likes")
+    def get_nft_likes(token_id: int):
+        """Get like count and whether the requesting wallet has liked this NFT."""
+        wallet = request.args.get("wallet", "").lower()
+        
+        # Get total count
+        count_row = g.db.execute(
+            "SELECT COUNT(*) as count FROM nft_likes WHERE token_id = ?",
+            (token_id,),
+        ).fetchone()
+        
+        # Check if wallet has liked
+        liked = False
+        if wallet:
+            like_row = g.db.execute(
+                "SELECT 1 FROM nft_likes WHERE token_id = ? AND liker_wallet = ?",
+                (token_id, wallet),
+            ).fetchone()
+            liked = like_row is not None
+        
+        return jsonify({
+            "count": count_row["count"] if count_row else 0,
+            "liked": liked,
+        })
+    
+    @app.get("/api/nfts/liked-by/<wallet>")
+    def get_liked_by_wallet(wallet: str):
+        """Get all token IDs liked by a specific wallet address."""
+        wallet = wallet.lower()
+        rows = g.db.execute(
+            "SELECT token_id FROM nft_likes WHERE liker_wallet = ? ORDER BY created_at DESC",
+            (wallet,),
+        ).fetchall()
+        return jsonify({"token_ids": [row["token_id"] for row in rows]})
+
+    @app.get("/api/nfts/<int:token_id>/likers")
+    def get_nft_likers(token_id: int):
+        """Get list of users who liked this NFT."""
+        rows = g.db.execute(
+            """
+            SELECT nl.liker_wallet, nl.created_at,
+                   u.display_name, u.username, u.avatar_url
+            FROM nft_likes nl
+            LEFT JOIN users u ON LOWER(u.wallet_address) = nl.liker_wallet
+            WHERE nl.token_id = ?
+            ORDER BY nl.created_at DESC
+            """,
+            (token_id,),
+        ).fetchall()
+
+        likers = []
+        for row in rows:
+            likers.append({
+                "wallet": row["liker_wallet"],
+                "display_name": row["display_name"] or row["username"],
+                "avatar_url": row["avatar_url"],
+                "liked_at": row["created_at"],
+            })
+
+        return jsonify({"likers": likers})
+
+    @app.get("/api/notifications/wallet/<wallet_address>")
+    def get_notifications_by_wallet(wallet_address: str):
+        """Get notifications for a wallet address (for Web3 users without session)."""
+        wallet = wallet_address.lower()
+        limit = min(max(int(request.args.get("limit", 20)), 1), 50)
+        
+        # Find user by wallet address
+        user_row = g.db.execute(
+            "SELECT id FROM users WHERE LOWER(wallet_address) = ?",
+            (wallet,),
+        ).fetchone()
+        
+        if not user_row:
+            return jsonify({"notifications": [], "unread": 0})
+        
+        user_id = user_row["id"]
+        
+        rows = g.db.execute(
+            """
+            SELECT id, title, message, artwork_id, token_id, from_wallet, is_read, created_at
+            FROM notifications
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+            LIMIT ?
+            """,
+            (user_id, limit),
+        ).fetchall()
+        
+        unread = g.db.execute(
+            "SELECT COUNT(1) AS cnt FROM notifications WHERE user_id = ? AND is_read = 0",
+            (user_id,),
+        ).fetchone()
+        
+        return jsonify({
+            "notifications": [dict(row) for row in rows],
+            "unread": unread["cnt"] if unread else 0,
+        })
+    
+    @app.post("/api/notifications/wallet/<wallet_address>/mark-read")
+    def mark_notifications_read_by_wallet(wallet_address: str):
+        """Mark notifications as read for a wallet address."""
+        wallet = wallet_address.lower()
+        data = request.get_json() or {}
+        ids = data.get("ids") or []
+        
+        user_row = g.db.execute(
+            "SELECT id FROM users WHERE LOWER(wallet_address) = ?",
+            (wallet,),
+        ).fetchone()
+        
+        if not user_row or not ids:
+            return jsonify({"status": "no_change"})
+        
+        placeholders = ",".join(["?"] * len(ids))
+        params = ids + [user_row["id"]]
+        g.db.execute(
+            f"""
+            UPDATE notifications
+            SET is_read = 1
+            WHERE id IN ({placeholders}) AND user_id = ?
+            """,
+            params,
         )
         g.db.commit()
         return jsonify({"status": "updated"})
@@ -2598,7 +2856,7 @@ def create_app() -> Flask:
             email_service = EmailService()
             success = email_service.send_email(
                 to_email="test@example.com",  # Will be redirected to hardcoded test email
-                subject="Test Email from ArtMart",
+                subject="Test Email from EtherMon",
                 body="This is a test email to verify email functionality.",
                 html_body="<h1>Test Email</h1><p>This is a test email to verify email functionality.</p>"
             )

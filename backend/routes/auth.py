@@ -231,3 +231,79 @@ def google_login():
             response.headers['Access-Control-Allow-Origin'] = origin
             response.headers['Access-Control-Allow-Credentials'] = 'true'
         return response, 500
+
+
+@auth_bp.post("/api/auth/wallet")
+@rate_limit(max_requests=30, window_seconds=60, per_user=False)
+def wallet_login():
+    """Login or register with an Ethereum wallet address."""
+    import re
+    try:
+        data = request.get_json() or {}
+        wallet_address = data.get("wallet_address", "").strip()
+
+        # Validate Ethereum address format
+        if not re.match(r"^0x[0-9a-fA-F]{40}$", wallet_address):
+            return jsonify({"error": "Invalid Ethereum address"}), 400
+
+        # Normalize to checksummed format (lowercase for storage)
+        wallet_address = wallet_address.lower()
+
+        from backend.db import get_connection
+        conn = get_connection()
+        try:
+            # Check if user already exists with this wallet
+            user = conn.execute(
+                "SELECT * FROM users WHERE wallet_address = ?",
+                (wallet_address,)
+            ).fetchone()
+
+            if user:
+                # Existing wallet user - log them in
+                session["user_id"] = user["id"]
+                session["role"] = user["role"]
+                logger.info(f"Wallet user logged in: {wallet_address} (ID: {user['id']})")
+                return jsonify({
+                    "id": user["id"],
+                    "username": user["username"],
+                    "role": user["role"],
+                    "display_name": user["display_name"],
+                    "wallet_address": user["wallet_address"],
+                    "avatar_url": user["avatar_url"],
+                })
+            else:
+                # New wallet - create user
+                truncated = f"{wallet_address[:6]}...{wallet_address[-4:]}"
+                conn.execute(
+                    """
+                    INSERT INTO users (username, email, password_hash, role, display_name, wallet_address)
+                    VALUES (?, ?, NULL, 'buyer', ?, ?)
+                    """,
+                    (wallet_address, f"{wallet_address}@wallet", truncated, wallet_address),
+                )
+                conn.commit()
+
+                new_user = conn.execute(
+                    "SELECT * FROM users WHERE wallet_address = ?",
+                    (wallet_address,)
+                ).fetchone()
+
+                session["user_id"] = new_user["id"]
+                session["role"] = new_user["role"]
+
+                logger.info(f"New wallet user created: {wallet_address} (ID: {new_user['id']})")
+                return jsonify({
+                    "id": new_user["id"],
+                    "username": new_user["username"],
+                    "role": new_user["role"],
+                    "display_name": new_user["display_name"],
+                    "wallet_address": new_user["wallet_address"],
+                    "avatar_url": new_user["avatar_url"],
+                }), 201
+        finally:
+            conn.close()
+
+    except Exception as e:
+        logger.error(f"Wallet login failed: {e}", exc_info=True)
+        return jsonify({"error": f"Wallet authentication failed: {str(e)}"}), 500
+

@@ -1,8 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, User, Wallet, Plus, Settings, LogOut, Sun, Moon, Menu, X, Compass } from "lucide-react";
+import { Search, Wallet, Sun, Moon, Menu, Compass, LogOut, AlertTriangle, User, Sparkles, Tag, Bell, BookOpen } from "lucide-react";
 import { useState } from "react";
-import AuthDialog from "@/components/auth/AuthDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,292 +9,304 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "@/components/theme-provider";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useWallet } from "@/context/WalletContext";
+import WalletSelectorDialog from "@/components/wallet/WalletSelectorDialog";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
-import { useSession } from "@/context/SessionContext";
+import { MintDialog } from "@/components/nft/MintDialog";
+import { ListNFTDialog } from "@/components/nft/ListNFTDialog";
+
+/** Truncate an Ethereum address: 0x1234…abcd */
+const truncateAddress = (addr: string) =>
+  `${addr.slice(0, 6)}…${addr.slice(-4)}`;
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { user, logout } = useSession();
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [authRedirectTo, setAuthRedirectTo] = useState<string>("/");
+  const { address, isConnecting, isCorrectNetwork, disconnect, switchToSepolia, setShowSelector } = useWallet();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const displayName = user?.display_name || user?.username;
-  const profilePath = user ? user.username || String(user.id) : "";
-  const avatarUrl = user?.avatar_url;
+  const [mintDialogOpen, setMintDialogOpen] = useState(false);
+  const [listDialogOpen, setListDialogOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-lg">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center">
-          <span className="text-2xl font-black tracking-tight text-foreground">
-            ARTMART
-          </span>
-        </Link>
+    <>
+      <WalletSelectorDialog />
+      <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-lg">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center">
+            <span className="text-2xl font-black tracking-tight text-foreground">
+              ETHERMON
+            </span>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link to="/">
-            <Button variant="ghost" className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
-              <Compass className="w-4 h-4 mr-2" />
-              Discover
-            </Button>
-          </Link>
-          <Link to="/search">
-            <Button variant="ghost" className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
-              <Search className="w-4 h-4 mr-2" />
-              Search
-            </Button>
-          </Link>
-          {user && (
-            <Link to="/balance">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
+            <Link to="/">
               <Button variant="ghost" className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
-                <Wallet className="w-4 h-4 mr-2" />
-                Balance
+                <Compass className="w-4 h-4 mr-2" />
+                Discover
               </Button>
             </Link>
-          )}
-          {user ? (
-            <>
-              <NotificationBell />
-              {user.role === "seller" && (
-                <Link to="/create">
-                  <Button className="bg-foreground text-background hover:bg-foreground/90">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create
-                  </Button>
-                </Link>
-              )}
-            </>
-          ) : (
-            <>
-              <Button 
-                className="bg-foreground text-background hover:bg-foreground/90"
-                onClick={() => {
-                  setAuthRedirectTo("/create");
-                  setAuthDialogOpen(true);
-                }}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create
+            <Link to="/search">
+              <Button variant="ghost" className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
+                <Search className="w-4 h-4 mr-2" />
+                Search
               </Button>
-              <Button 
-                variant="outline" 
-                className="border-foreground text-foreground hover:bg-foreground hover:text-background"
-                onClick={() => {
-                  setAuthRedirectTo("/");
-                  setAuthDialogOpen(true);
-                }}
-              >
-                Log In
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                title="Toggle theme"
-              >
-                {theme === "dark" ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </Button>
-            </>
-          )}
-          {user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage src={avatarUrl || ""} alt={displayName || "Profile"} />
-                    <AvatarFallback className="bg-primary text-primary-foreground">
-                      {displayName ? displayName.charAt(0).toUpperCase() : <User className="h-5 w-5" />}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem asChild>
-                  <Link to={`/profile/${profilePath}`} className="cursor-pointer">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/settings" className="cursor-pointer">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                >
-                  {theme === "dark" ? (
-                    <Sun className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Moon className="mr-2 h-4 w-4" />
-                  )}
-                  <span>{theme === "dark" ? "Light" : "Dark"} Mode</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={async () => {
-                    await logout();
-                    navigate("/");
-                  }}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign Out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
+            </Link>
 
-        {/* Mobile Menu */}
-        <div className="flex md:hidden items-center gap-1">
-          {user && <NotificationBell />}
-          {user && (
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={avatarUrl || ""} alt={displayName || "Profile"} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                {displayName ? displayName.charAt(0).toUpperCase() : <User className="h-4 w-4" />}
-              </AvatarFallback>
-            </Avatar>
-          )}
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <div className="flex flex-col gap-4 mt-8">
-                <Link to="/" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
-                    <Compass className="w-4 h-4 mr-2" />
-                    Discover
+            {address ? (
+              <>
+                {/* Wrong network warning */}
+                {!isCorrectNetwork && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={switchToSepolia}
+                    className="gap-2"
+                  >
+                    <AlertTriangle className="w-4 h-4" />
+                    Switch to Sepolia
                   </Button>
-                </Link>
-                <Link to="/search" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
-                    <Search className="w-4 h-4 mr-2" />
-                    Search
-                  </Button>
-                </Link>
-                {user && (
-                  <Link to="/balance" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
-                      <Wallet className="w-4 h-4 mr-2" />
-                      Balance
-                    </Button>
-                  </Link>
                 )}
-                {user ? (
-                  <>
-                    {user.role === "seller" && (
-                      <Link to="/create" onClick={() => setMobileMenuOpen(false)}>
-                        <Button className="w-full bg-foreground text-background hover:bg-foreground/90">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create
-                        </Button>
-                      </Link>
-                    )}
-                    <Link to={`/profile/${profilePath}`} onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Button>
-                    </Link>
-                    <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Settings
-                      </Button>
-                    </Link>
+
+                {/* Mint Button */}
+                <Button
+                  variant="ghost"
+                  className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black gap-2"
+                  onClick={() => setMintDialogOpen(true)}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Mint
+                </Button>
+
+                {/* List Button */}
+                <Button
+                  variant="ghost"
+                  className="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black gap-2"
+                  onClick={() => setListDialogOpen(true)}
+                >
+                  <Tag className="w-4 h-4" />
+                  List
+                </Button>
+
+                {/* Notification Bell */}
+                <NotificationBell />
+
+                {/* Wallet dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setTheme(theme === "dark" ? "light" : "dark");
-                        setMobileMenuOpen(false);
-                      }}
+                      variant="outline"
+                      className="border-foreground/30 gap-2 font-mono text-sm"
+                    >
+                      <Wallet className="w-4 h-4" />
+                      {truncateAddress(address)}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuItem className="font-mono text-xs text-muted-foreground cursor-default">
+                      {address}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => navigate("/profile")}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>My Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => navigate("/documentation")}
+                    >
+                      <BookOpen className="mr-2 h-4 w-4" />
+                      <span>Documentation</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                     >
                       {theme === "dark" ? (
                         <Sun className="mr-2 h-4 w-4" />
                       ) : (
                         <Moon className="mr-2 h-4 w-4" />
                       )}
-                      {theme === "dark" ? "Light" : "Dark"} Mode
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-destructive"
-                      onClick={async () => {
-                        await logout();
-                        setMobileMenuOpen(false);
-                        navigate("/");
-                      }}
+                      <span>{theme === "dark" ? "Light" : "Dark"} Mode</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer text-destructive"
+                      onClick={disconnect}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
+                      <span>Disconnect</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  className="border-foreground text-foreground hover:bg-foreground hover:text-background gap-2"
+                  onClick={() => setShowSelector(true)}
+                  disabled={isConnecting}
+                >
+                  <Wallet className="w-4 h-4" />
+                  {isConnecting ? "Connecting..." : "Connect Wallet"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  title="Toggle theme"
+                >
+                  {theme === "dark" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu */}
+          <div className="flex md:hidden items-center gap-1">
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72">
+                <div className="flex flex-col gap-4 mt-8">
+                  <Link to="/" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
+                      <Compass className="w-4 h-4 mr-2" />
+                      Discover
                     </Button>
-                  </>
-                 ) : (
-                  <>
-                    <Button 
-                      className="w-full bg-foreground text-background hover:bg-foreground/90"
-                      onClick={() => {
-                        setAuthRedirectTo("/create");
-                        setAuthDialogOpen(true);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create
+                  </Link>
+                  <Link to="/search" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
+                      <Search className="w-4 h-4 mr-2" />
+                      Search
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full border-foreground text-foreground hover:bg-foreground hover:text-background"
-                      onClick={() => {
-                        setAuthRedirectTo("/");
-                        setAuthDialogOpen(true);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      Log In
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setTheme(theme === "dark" ? "light" : "dark");
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      {theme === "dark" ? (
-                        <Sun className="mr-2 h-4 w-4" />
-                      ) : (
-                        <Moon className="mr-2 h-4 w-4" />
+                  </Link>
+
+                  {address ? (
+                    <>
+                      <div className="px-4 py-2 bg-muted rounded-md">
+                        <p className="text-xs text-muted-foreground">Connected</p>
+                        <p className="font-mono text-sm truncate">{truncateAddress(address)}</p>
+                      </div>
+
+                      <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full justify-start hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
+                          <User className="w-4 h-4 mr-2" />
+                          My Profile
+                        </Button>
+                      </Link>
+
+                      <Link to="/documentation" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="ghost" className="w-full justify-start hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black">
+                          <BookOpen className="w-4 h-4 mr-2" />
+                          Documentation
+                        </Button>
+                      </Link>
+
+                      {!isCorrectNetwork && (
+                        <Button
+                          variant="destructive"
+                          className="w-full gap-2"
+                          onClick={() => {
+                            switchToSepolia();
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          <AlertTriangle className="w-4 h-4" />
+                          Switch to Sepolia
+                        </Button>
                       )}
-                      {theme === "dark" ? "Light" : "Dark"} Mode
-                    </Button>
-                  </>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setTheme(theme === "dark" ? "light" : "dark");
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        {theme === "dark" ? (
+                          <Sun className="mr-2 h-4 w-4" />
+                        ) : (
+                          <Moon className="mr-2 h-4 w-4" />
+                        )}
+                        {theme === "dark" ? "Light" : "Dark"} Mode
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-destructive"
+                        onClick={() => {
+                          disconnect();
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Disconnect
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full border-foreground text-foreground hover:bg-foreground hover:text-background gap-2"
+                        onClick={() => {
+                          setShowSelector(true);
+                          setMobileMenuOpen(false);
+                        }}
+                        disabled={isConnecting}
+                      >
+                        <Wallet className="w-4 h-4" />
+                        {isConnecting ? "Connecting..." : "Connect Wallet"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start"
+                        onClick={() => {
+                          setTheme(theme === "dark" ? "light" : "dark");
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        {theme === "dark" ? (
+                          <Sun className="mr-2 h-4 w-4" />
+                        ) : (
+                          <Moon className="mr-2 h-4 w-4" />
+                        )}
+                        {theme === "dark" ? "Light" : "Dark"} Mode
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
-      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} redirectTo={authRedirectTo} />
-    </nav>
+      </nav>
+
+      {/* Dialogs */}
+      <MintDialog
+        open={mintDialogOpen}
+        onOpenChange={setMintDialogOpen}
+      />
+      <ListNFTDialog
+        open={listDialogOpen}
+        onOpenChange={setListDialogOpen}
+      />
+    </>
   );
 };
 

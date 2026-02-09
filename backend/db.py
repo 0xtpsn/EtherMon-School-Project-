@@ -63,6 +63,17 @@ def _ensure_runtime_migrations(conn: sqlite3.Connection) -> None:
     # Make password_hash optional (for Google OAuth users)
     # Note: SQLite doesn't support ALTER COLUMN, so we'll handle this in application logic
     
+    # Add wallet_address column for Web3 login
+    if "wallet_address" not in existing_user_columns:
+        conn.execute("ALTER TABLE users ADD COLUMN wallet_address TEXT")
+    
+    # Create unique index on wallet_address if it doesn't exist
+    cursor = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_users_wallet_address'"
+    )
+    if not cursor.fetchone():
+        conn.execute("CREATE UNIQUE INDEX idx_users_wallet_address ON users(wallet_address) WHERE wallet_address IS NOT NULL")
+    
     # Migrate artworks table - add listing_expires_at column if it doesn't exist
     cursor = conn.execute(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='artworks'"
@@ -92,6 +103,37 @@ def _ensure_runtime_migrations(conn: sqlite3.Connection) -> None:
         conn.execute("CREATE INDEX IF NOT EXISTS idx_artwork_views_artwork ON artwork_views(artwork_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_artwork_views_user ON artwork_views(user_id)")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_artwork_views_date ON artwork_views(artwork_id, user_id, viewed_at)")
+    
+    # Create nft_likes table for tracking NFT likes by wallet address
+    cursor = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='nft_likes'"
+    )
+    if not cursor.fetchone():
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS nft_likes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                token_id INTEGER NOT NULL,
+                owner_wallet TEXT NOT NULL,
+                liker_wallet TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(token_id, liker_wallet)
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_nft_likes_token ON nft_likes(token_id)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_nft_likes_owner ON nft_likes(owner_wallet)")
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_nft_likes_liker ON nft_likes(liker_wallet)")
+    
+    # Add from_wallet column to notifications for tracking who triggered the notification
+    cursor = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='notifications'"
+    )
+    if cursor.fetchone():
+        cursor = conn.execute("PRAGMA table_info(notifications)")
+        existing_notif_columns = {row[1] for row in cursor.fetchall()}
+        if "from_wallet" not in existing_notif_columns:
+            conn.execute("ALTER TABLE notifications ADD COLUMN from_wallet TEXT")
+        if "token_id" not in existing_notif_columns:
+            conn.execute("ALTER TABLE notifications ADD COLUMN token_id INTEGER")
     
     # Note: Role constraint is CHECK(role IN ('buyer','seller'))
     # The 'both' role has been deprecated - all users should be either 'buyer' or 'seller'

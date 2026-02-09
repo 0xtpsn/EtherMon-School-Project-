@@ -104,7 +104,7 @@ class NotificationService:
                 """
                 self.email_service.send_email(
                     user["email"],
-                    f"ArtMart: {title}",
+                    f"EtherMon: {title}",
                     message,
                     html_body
                 )

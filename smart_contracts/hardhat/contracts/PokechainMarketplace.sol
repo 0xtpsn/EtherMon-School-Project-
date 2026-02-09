@@ -381,7 +381,6 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
 
         emit FundsWithdrawn(owner(), balance);
     }
-    // TODO: think there is a large bug here
 
     /*///////////////////////////////////////////////////////////////
                           VIEW FUNCTIONS

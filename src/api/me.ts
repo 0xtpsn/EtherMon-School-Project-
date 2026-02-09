@@ -55,5 +55,7 @@ export const meApi = {
     return api.get<{ transactions: Transaction[]; total: number }>(path);
   },
   profileDetail: (identifier: string) => api.get<ProfileDetailResponse>(`/profiles/${identifier}`),
+  updateWalletProfile: (walletAddress: string, payload: Record<string, any>) =>
+    api.put<{ status: string; profile: any }>(`/profiles/wallet/${walletAddress}`, payload),
 };
 
