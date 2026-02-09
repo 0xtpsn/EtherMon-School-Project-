@@ -24,7 +24,7 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
     //////////////////////////////////////////////////////////////*/
 
     uint256 public constant MAX_SUPPLY = 1025;
-    uint256 public constant MINT_PRICE = 0.01 ether;
+    uint256 public constant MINT_PRICE = 0 ether;
     uint256 public constant MAX_PER_WALLET = 50;
     uint256 public constant TOTAL_POKEMON = 1025;
 
@@ -32,7 +32,7 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
                           STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
 
-    string private baseURI = "https://bafybeienzjyalm2axjk3gx75mcrbjjjv2ej3j5guoaeddjifgryheut57m.ipfs.dweb.link/";
+    string private baseURI = "https://w3s.link/ipfs/bafybeigii5wrhvhvrbxmv42nqcrr7wmbogtg6gdj2rwbi5awr6yxf4jn3i/";
     string public baseExtension = ".json";
     bool public saleActive = false;
 

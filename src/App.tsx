@@ -12,6 +12,7 @@ import Settings from "./pages/Settings";
 import ArtDetail from "./pages/ArtDetail";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
+import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,9 +31,10 @@ const App = () => (
           <Route path="/balance" element={<Balance />} />
           <Route path="/create" element={<Create />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/art/:id" element={<ArtDetail />} />
+          <Route path="/nft/:tokenId" element={<ArtDetail />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/documentation" element={<Documentation />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

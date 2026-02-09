@@ -35,6 +35,7 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
     
     uint256 public platformFeeBps = 250; // 2.5% default (in basis points)
     uint256 public constant MAX_FEE_BPS = 1000; // Max 10%
+    uint256 public accumulatedFees;
     
     bool public paused = false;
 
@@ -192,6 +193,7 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
 
         // Calculate fees
         uint256 fee = (listing.price * platformFeeBps) / 10000;
+        accumulatedFees += fee;
         uint256 sellerProceeds = listing.price - fee;
 
         // Transfer NFT to buyer
@@ -297,6 +299,7 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
         if (auction.highestBidder != address(0)) {
             // Calculate fees
             uint256 fee = (auction.highestBid * platformFeeBps) / 10000;
+            accumulatedFees += fee;
             uint256 sellerProceeds = auction.highestBid - fee;
 
             // Transfer NFT to winner
@@ -369,8 +372,9 @@ contract PokechainMarketplace is ReentrancyGuard, Ownable {
      * @dev Withdraw accumulated platform fees
      */
     function withdrawFees() external onlyOwner nonReentrant {
-        uint256 balance = address(this).balance;
+        uint256 balance = accumulatedFees;
         require(balance > 0, "No fees to withdraw");
+        accumulatedFees = 0;
 
         (bool success, ) = payable(owner()).call{value: balance}("");
         require(success, "Withdraw failed");

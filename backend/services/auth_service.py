@@ -126,7 +126,7 @@ class AuthService:
         
         self.email_service.send_email(
             email,
-            "ArtMart: Password Reset Request",
+            "EtherMon: Password Reset Request",
             f"Click this link to reset your password: {reset_url}\n\nThis link expires in 1 hour.",
             html_body
         )
@@ -165,7 +165,7 @@ class AuthService:
         # Send confirmation email
         self.email_service.send_email(
             email,
-            "ArtMart: Password Changed",
+            "EtherMon: Password Changed",
             "Your password has been successfully changed. If you didn't make this change, please contact support immediately.",
         )
         

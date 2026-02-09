@@ -6,6 +6,7 @@ venv/
 .env
 .env.local
 .env.*.local
+smart_contracts/hardhat/.env
 keys.md
 *.pem
 *.key
@@ -18,6 +19,7 @@ build/
 # Database
 *.db
 *.sqlite
+*.sqlite3
 
 # IDE & OS
 .DS_Store
@@ -27,7 +29,12 @@ build/
 # Logs
 *.log
 npm-debug.log*
+logs/
 
 # Hardhat
 smart_contracts/hardhat/cache/
 smart_contracts/hardhat/artifacts/
+
+# Python
+__pycache__/
+*.pyc

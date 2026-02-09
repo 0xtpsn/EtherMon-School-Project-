@@ -1,0 +1,21 @@
+[
+    "function balanceOf(address owner) view returns (uint256)",
+    "function ownerOf(uint256 tokenId) view returns (address)",
+    "function totalSupply() view returns (uint256)",
+    "function tokenURI(uint256 tokenId) view returns (string)",
+    "function getPokemonId(uint256 tokenId) view returns (uint256)",
+    "function name() view returns (string)",
+    "function symbol() view returns (string)",
+    "function getApproved(uint256 tokenId) view returns (address)",
+    "function isApprovedForAll(address owner, address operator) view returns (bool)",
+    "function approve(address to, uint256 tokenId) external",
+    "function setApprovalForAll(address operator, bool approved) external",
+    "function mint(uint256 quantity) payable",
+    "function saleActive() view returns (bool)",
+    "function remainingSupply() view returns (uint256)",
+    "function walletMinted(address wallet) view returns (uint256)",
+    "function MAX_SUPPLY() view returns (uint256)",
+    "function MAX_PER_WALLET() view returns (uint256)",
+    "function MINT_PRICE() view returns (uint256)",
+    "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
+]

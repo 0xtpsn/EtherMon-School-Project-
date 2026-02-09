@@ -1,796 +1,640 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { useEffect, useState, useCallback } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, Share2, MoreVertical, Edit, DollarSign, Eye, EyeOff } from "lucide-react";
-import { meApi } from "@/api/me";
+import {
+  ArrowLeft,
+  Heart,
+  Share2,
+  ExternalLink,
+  Clock,
+  Tag,
+  Gavel,
+  X,
+  Edit2,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import AuthDialog from "@/components/auth/AuthDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BidHistoryTab } from "@/components/art/BidHistoryTab";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { artworksApi } from "@/api/artworks";
-import { ArtworkDetail as ArtworkDetailType } from "@/api/types";
-import { useSession } from "@/context/SessionContext";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatCurrency } from "@/lib/utils";
+import { useNFTDetail } from "@/hooks/useNFTDetail";
+import {
+  BLOCK_EXPLORER,
+  POKECHAIN_NFT_ADDRESS,
+  POKECHAIN_MARKETPLACE_ADDRESS,
+  CHAIN_NAME,
+} from "@/config/contracts";
+import { ethers } from "ethers";
+import PokechainMarketplaceAbi from "@/config/abi/PokechainMarketplace.json";
+import PokechainNFTAbi from "@/config/abi/PokechainNFT.json";
+import { localNotifications } from "@/services/localNotifications";
+import { useWallet } from "@/context/WalletContext";
+import { nftLikesApi, Liker } from "@/api/notifications";
+import { meApi } from "@/api/me";
+import { BidRecord } from "@/hooks/useNFTDetail";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type ArtworkDetail = ArtworkDetailType;
+/* ─── helpers ──────────────────────────────────────────────── */
+
+function typeColor(type: string): string {
+  const colors: Record<string, string> = {
+    Fire: "#F08030",
+    Water: "#6890F0",
+    Grass: "#78C850",
+    Electric: "#F8D030",
+    Psychic: "#F85888",
+    Dragon: "#7038F8",
+    Normal: "#A8A878",
+    Fighting: "#C03028",
+    Ghost: "#705898",
+    Dark: "#705848",
+    Steel: "#B8B8D0",
+    Fairy: "#EE99AC",
+    Ice: "#98D8D8",
+    Bug: "#A8B820",
+    Rock: "#B8A038",
+    Ground: "#E0C068",
+    Poison: "#A040A0",
+    Flying: "#A890F0",
+  };
+  return colors[type] || "#A8A878";
+}
+
+function rarityStyle(rarity: string) {
+  switch (rarity) {
+    case "Legendary":
+      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+    case "Epic":
+      return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+    case "Rare":
+      return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+    case "Uncommon":
+      return "bg-green-500/20 text-green-400 border-green-500/30";
+    default:
+      return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+  }
+}
+
+function formatPrice(price: string): string {
+  const num = parseFloat(price);
+  if (num === 0) return "0";
+  if (num < 0.0001) return "<0.0001";
+  return num.toFixed(4);
+}
+
+function truncateAddress(addr: string): string {
+  if (!addr || addr.length < 10) return addr;
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
+function formatTimeRemaining(endTimeUnix: number): string {
+  const now = Math.floor(Date.now() / 1000);
+  const remaining = endTimeUnix - now;
+  if (remaining <= 0) return "Ended";
+  const d = Math.floor(remaining / 86400);
+  const h = Math.floor((remaining % 86400) / 3600);
+  const m = Math.floor((remaining % 3600) / 60);
+  const s = remaining % 60;
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  return `${h}h ${m}m ${s}s`;
+}
+
+/* ─── component ────────────────────────────────────────────── */
 
 const ArtDetail = () => {
-  const { id } = useParams();
+  const { tokenId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useSession();
-  const [authDialogOpen, setAuthDialogOpen] = useState(false);
-  const [artwork, setArtwork] = useState<ArtworkDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [isWatching, setIsWatching] = useState(false);
-  const [editPriceDialogOpen, setEditPriceDialogOpen] = useState(false);
-  const [newPrice, setNewPrice] = useState("");
-  const [editDetailsDialogOpen, setEditDetailsDialogOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [listForSaleDialogOpen, setListForSaleDialogOpen] = useState(false);
-  const [listingType, setListingType] = useState<"fixed" | "auction">("fixed");
-  const [salePrice, setSalePrice] = useState("");
-  const [fixedPriceExpiry, setFixedPriceExpiry] = useState(""); // Duration in hours for fixed price
-  const [startingBid, setStartingBid] = useState("");
-  const [reservePrice, setReservePrice] = useState(""); // Reserve price for auctions
-  const [auctionDuration, setAuctionDuration] = useState("24");
-  const [bidDialogOpen, setBidDialogOpen] = useState(false);
-  const [bidAmount, setBidAmount] = useState("");
-  const [bidExpiry, setBidExpiry] = useState("24");
-  const [purchaseConfirmOpen, setPurchaseConfirmOpen] = useState(false);
-  const [auctionExplainerOpen, setAuctionExplainerOpen] = useState(false);
-  const [delistConfirmOpen, setDelistConfirmOpen] = useState(false);
-  const [userBalance, setUserBalance] = useState<number>(0);
-  const [activityPage, setActivityPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
-  const [userActiveBid, setUserActiveBid] = useState<{ id: number; amount: number; expires_at?: string | null } | null>(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [currentUsername, setCurrentUsername] = useState<string>("");
+  const { nft, loading, error, refetch } = useNFTDetail(tokenId);
 
-  // Calculate available bid expiry options based on auction end time
-  const getAvailableExpiryOptions = () => {
-    if (!artwork?.auction?.end_time) return [];
-    
-    const auctionEndTime = new Date(artwork.auction.end_time).getTime();
-    const now = Date.now();
-    const remainingHours = Math.max(0, (auctionEndTime - now) / (1000 * 60 * 60));
-    const remainingMinutes = remainingHours * 60;
-    
-    // Define all possible options (in hours for consistency)
-    const allOptions = [
-      { label: "30 minutes", value: "0.5", hours: 0.5 },
-      { label: "1 hour", value: "1", hours: 1 },
-      { label: "2 hours", value: "2", hours: 2 },
-      { label: "4 hours", value: "4", hours: 4 },
-      { label: "6 hours", value: "6", hours: 6 },
-      { label: "12 hours", value: "12", hours: 12 },
-      { label: "24 hours", value: "24", hours: 24 },
-      { label: "2 days", value: "48", hours: 48 },
-      { label: "3 days", value: "72", hours: 72 },
-    ];
-    
-    // Filter options that don't exceed auction end time
-    const validOptions = allOptions.filter(option => {
-      return option.hours <= remainingHours;
-    });
-    
-    // Always add "Until auction ends" option at the end
-    const hoursUntilEnd = Math.floor(remainingHours);
-    const minutesUntilEnd = Math.floor((remainingHours - hoursUntilEnd) * 60);
-    let untilEndLabel = "";
-    if (hoursUntilEnd > 0 && minutesUntilEnd > 0) {
-      untilEndLabel = `${hoursUntilEnd}h ${minutesUntilEnd}m (until auction ends)`;
-    } else if (hoursUntilEnd > 0) {
-      untilEndLabel = `${hoursUntilEnd}h (until auction ends)`;
-    } else if (minutesUntilEnd > 0) {
-      untilEndLabel = `${minutesUntilEnd}m (until auction ends)`;
-    } else {
-      untilEndLabel = "Until auction ends";
-    }
-    
-    // Add "until auction ends" option if there's time remaining
-    // Use a special marker value that's clearly identifiable
-    if (remainingHours > 0) {
-      // Use a very large number as a unique identifier for "until end"
-      // This ensures it won't conflict with any regular hour values
-      validOptions.push({
-        label: untilEndLabel,
-        value: "999999", // Special marker value for "until auction ends"
-        hours: remainingHours
-      });
-    }
-    
-    return validOptions;
-  };
-  
-  // Calculate expiry hours from existing bid's expires_at
-  const calculateExpiryFromExistingBid = (expiresAt: string | null | undefined): string | null => {
-    if (!expiresAt) return null;
-    const expiryDate = new Date(expiresAt);
-    const now = new Date();
-    const diffHours = (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-    if (diffHours <= 0) return null;
-    return diffHours.toString();
-  };
-  
-  // Get available expiry options, including current expiry if it exists
-  const getAvailableExpiryOptionsWithCurrent = () => {
-    const baseOptions = getAvailableExpiryOptions();
-    
-    // If user has existing bid with expiry, add it to options if not already present
-    if (userActiveBid?.expires_at) {
-      const currentExpiry = calculateExpiryFromExistingBid(userActiveBid.expires_at);
-      if (currentExpiry) {
-        const expiryHours = parseFloat(currentExpiry);
-        const hours = Math.floor(expiryHours);
-        const minutes = Math.floor((expiryHours - hours) * 60);
-        
-        let currentLabel = "";
-        if (hours > 0 && minutes > 0) {
-          currentLabel = `${hours}h ${minutes}m (current)`;
-        } else if (hours > 0) {
-          currentLabel = `${hours}h (current)`;
-        } else if (minutes > 0) {
-          currentLabel = `${minutes}m (current)`;
-        } else {
-          currentLabel = `${Math.round(expiryHours * 60)}m (current)`;
-        }
-        
-        // Check if current expiry is already in options (compare with hours property if available)
-        const exists = baseOptions.some(opt => {
-          const optHours = opt.hours !== undefined ? opt.hours : parseFloat(opt.value);
-          return Math.abs(optHours - expiryHours) < 0.1;
-        });
-        
-        if (!exists && expiryHours > 0) {
-          // Add current expiry as first option
-          return [
-            { label: currentLabel, value: currentExpiry, hours: expiryHours },
-            ...baseOptions
-          ];
+  // Connected wallet from shared context
+  const { address: walletAddress, signer: walletSigner, setShowSelector } = useWallet();
+  const connectedWallet = walletAddress?.toLowerCase() || null;
+
+  // Dialog state
+  const [showBuyDialog, setShowBuyDialog] = useState(false);
+  const [showBidDialog, setShowBidDialog] = useState(false);
+  const [showListDialog, setShowListDialog] = useState(false);
+  const [showAuctionDialog, setShowAuctionDialog] = useState(false);
+  const [showUpdatePriceDialog, setShowUpdatePriceDialog] = useState(false);
+  const [showCancelListingDialog, setShowCancelListingDialog] = useState(false);
+  const [showCancelAuctionDialog, setShowCancelAuctionDialog] = useState(false);
+
+  // Form state
+  const [bidAmount, setBidAmount] = useState("");
+  const [listPrice, setListPrice] = useState("");
+  const [auctionStartPrice, setAuctionStartPrice] = useState("");
+  const [auctionDuration, setAuctionDuration] = useState("24");
+  const [newPrice, setNewPrice] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [likersDialogOpen, setLikersDialogOpen] = useState(false);
+  const [likers, setLikers] = useState<Liker[]>([]);
+  const [bidderProfiles, setBidderProfiles] = useState<Record<string, { username?: string; avatar_url?: string | null; display_name?: string }>>({});
+
+  // Fetch like status from backend
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      if (!tokenId) return;
+      try {
+        const status = await nftLikesApi.getStatus(Number(tokenId), connectedWallet || undefined);
+        setIsFavorited(status.liked);
+        setLikeCount(status.count);
+      } catch {
+        // Backend might be offline, check localStorage fallback
+        if (connectedWallet) {
+          try {
+            const stored = localStorage.getItem(`ethermon_favorites_${connectedWallet}`);
+            if (stored) {
+              const favorites = JSON.parse(stored);
+              setIsFavorited(favorites.includes(Number(tokenId)));
+            }
+          } catch { }
         }
       }
-    }
-    
-    return baseOptions;
-  };
-  
-  const availableExpiryOptions = getAvailableExpiryOptionsWithCurrent();
+    };
+    fetchLikeStatus();
+  }, [connectedWallet, tokenId]);
 
-  // Update timer every second
+  // Fetch bidder profiles for the Bids tab
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    if (!nft?.bidHistory || nft.bidHistory.length === 0) return;
+    const uniqueBidders = [...new Set(nft.bidHistory.map(b => b.bidder.toLowerCase()))];
+    // Only fetch profiles we don't have yet
+    const missing = uniqueBidders.filter(addr => !(addr in bidderProfiles));
+    if (missing.length === 0) return;
 
+    const fetchProfiles = async () => {
+      const profiles: typeof bidderProfiles = { ...bidderProfiles };
+      for (const addr of missing) {
+        try {
+          const data = await meApi.profileDetail(addr);
+          if (data?.profile) {
+            profiles[addr] = {
+              username: data.profile.username,
+              display_name: data.profile.display_name,
+              avatar_url: data.profile.avatar_url,
+            };
+          }
+        } catch {
+          // Profile not found — wallet-only user
+          profiles[addr] = {};
+        }
+      }
+      setBidderProfiles(profiles);
+    };
+    fetchProfiles();
+  }, [nft?.bidHistory]);
+
+  // Live countdown ticker
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Define fetchArtwork using useCallback so it can be used throughout the component
-  const fetchArtwork = useCallback(async () => {
-    if (!id) return;
-    
-    try {
-      const data = await artworksApi.detail(id);
-      
-      setArtwork(data.artwork);
-      setIsFavorited(Boolean(data.user_state?.favorited));
-      setIsWatching(Boolean(data.user_state?.watching));
-      if (data.user_state?.active_bid) {
-        setUserActiveBid(data.user_state.active_bid);
-      } else {
-        setUserActiveBid(null);
-      }
-      setUserBalance(data.user_state?.available_balance ?? 0);
-      setCurrentUsername(data.user_state?.username || user?.username || "");
-    } catch (error: any) {
-      const errorMessage = error.status === 0 
-        ? "Unable to connect to server. Please check your connection."
-        : error.message || "Failed to load artwork details";
+
+
+  // Derived
+  const isOwner =
+    connectedWallet && nft?.owner?.toLowerCase() === connectedWallet;
+  const isListed = nft?.marketStatus === "listed";
+  const isAuction = nft?.marketStatus === "auction";
+  const type = nft?.attributes.find(
+    (a) => a.trait_type === "Type"
+  )?.value as string | undefined;
+  const secondaryType = nft?.attributes.find(
+    (a) => a.trait_type === "Secondary Type"
+  )?.value as string | undefined;
+  const rarity = nft?.attributes.find(
+    (a) => a.trait_type === "Rarity"
+  )?.value as string | undefined;
+  const generation = nft?.attributes.find(
+    (a) => a.trait_type === "Generation"
+  )?.value;
+  const hp = nft?.attributes.find(
+    (a) => a.trait_type === "HP"
+  )?.value;
+  const attack = nft?.attributes.find(
+    (a) => a.trait_type === "Attack"
+  )?.value;
+  const defense = nft?.attributes.find(
+    (a) => a.trait_type === "Defense"
+  )?.value;
+  const speed = nft?.attributes.find(
+    (a) => a.trait_type === "Speed"
+  )?.value;
+
+  const etherscanTokenUrl = `${BLOCK_EXPLORER}/nft/${POKECHAIN_NFT_ADDRESS}/${nft?.tokenId}`;
+  const etherscanOwnerUrl = `${BLOCK_EXPLORER}/address/${nft?.owner}`;
+
+  /* ─── marketplace helpers (same pattern as ArtCard) ──────── */
+
+  const ensureApproval = async (signer: ethers.Signer): Promise<boolean> => {
+    if (!nft) return false;
+    const nftContract = new ethers.Contract(
+      POKECHAIN_NFT_ADDRESS,
+      PokechainNFTAbi,
+      signer
+    );
+    const approved = await nftContract.getApproved(nft.tokenId);
+    if (
+      approved.toLowerCase() !== POKECHAIN_MARKETPLACE_ADDRESS.toLowerCase()
+    ) {
       toast({
-        title: "Error",
-        description: errorMessage,
+        title: "Approval required",
+        description: "Approving NFT for marketplace...",
+      });
+      const approveTx = await nftContract.approve(
+        POKECHAIN_MARKETPLACE_ADDRESS,
+        nft.tokenId
+      );
+      await approveTx.wait();
+      toast({
+        title: "Approval granted",
+        description: "NFT approved for marketplace",
+      });
+    }
+    return true;
+  };
+
+  const requireWallet = (): boolean => {
+    if (!connectedWallet || !walletSigner) {
+      setShowSelector(true);
+      return false;
+    }
+    return true;
+  };
+
+  /* Buy */
+  const handleBuy = async () => {
+    if (!requireWallet() || !nft || !walletSigner) return;
+    setIsProcessing(true);
+    try {
+      const marketplace = new ethers.Contract(
+        POKECHAIN_MARKETPLACE_ADDRESS,
+        PokechainMarketplaceAbi,
+        walletSigner
+      );
+      const tx = await marketplace.buyItem(nft.tokenId, {
+        value: ethers.parseEther(nft.price),
+      });
+      toast({
+        title: "Transaction submitted",
+        description: "Waiting for confirmation...",
+      });
+      await tx.wait();
+      toast({
+        title: "Purchase successful!",
+        description: `You are now the owner of ${nft.name}`,
+      });
+
+      // Send local notification
+      localNotifications.notifyPurchase(nft.tokenId, nft.price);
+
+      setShowBuyDialog(false);
+      // Small delay to let RPC node index the new block
+      await new Promise(r => setTimeout(r, 2000));
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Purchase failed",
+        description: err.reason || err.message || "Transaction failed",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
-    }
-  }, [id, toast, user?.username]);
-
-  useEffect(() => {
-    if (!id) return;
-    
-    setLoading(true);
-    fetchArtwork();
-  }, [id, fetchArtwork]);
-
-  const handlePurchase = async () => {
-    if (!user) {
-      setAuthDialogOpen(true);
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to purchase this artwork",
-      });
-      return;
-    }
-
-    if (!artwork) return;
-
-    // Check if user is trying to buy their own artwork
-    if (artwork.owner.id === user.id) {
-      toast({
-        title: "Cannot purchase",
-        description: "You already own this artwork",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // If it's an auction, open the bid dialog instead of auto-bidding
-    if (auctionIsActive) {
-      // If user has an active bid, pre-fill with their current bid amount and expiry
-      if (userActiveBid) {
-        setBidAmount(userActiveBid.amount.toString());
-        // Calculate expiry from existing bid's expires_at
-        const existingExpiry = calculateExpiryFromExistingBid(userActiveBid.expires_at);
-        if (existingExpiry) {
-          // Find closest matching option
-          const matchingOption = availableExpiryOptions.find(opt => {
-            if (opt.value === "999999") {
-              // For "until end" option, check if existing expiry is close to auction end
-              if (artwork.auction?.end_time) {
-                const auctionEnd = new Date(artwork.auction.end_time);
-                const existingExpiryDate = new Date(userActiveBid.expires_at!);
-                const diff = Math.abs(auctionEnd.getTime() - existingExpiryDate.getTime());
-                return diff < 60000; // Within 1 minute
-              }
-              return false;
-            }
-            const optValue = parseFloat(opt.value);
-            return Math.abs(optValue - parseFloat(existingExpiry)) < 0.5;
-          });
-          setBidExpiry(matchingOption ? matchingOption.value : existingExpiry);
-        } else {
-          // Default to "until auction ends" if available, otherwise "24"
-          const untilEndOption = availableExpiryOptions.find(opt => opt.value === "999999");
-          setBidExpiry(untilEndOption ? untilEndOption.value : "24");
-        }
-      } else if (artwork.auction) {
-        const minBid = (artwork.auction.current_bid ?? artwork.auction.start_price ?? 0) + 1; // Minimum increment
-        setBidAmount(minBid.toString());
-        // Default to "until auction ends" if available, otherwise "24"
-        const untilEndOption = availableExpiryOptions.find(opt => opt.value === "999999");
-        setBidExpiry(untilEndOption ? untilEndOption.value : "24");
-      }
-      setBidDialogOpen(true);
-      return;
-    }
-
-    // Show purchase confirmation dialog
-    setPurchaseConfirmOpen(true);
-  };
-
-  const confirmPurchase = async () => {
-    if (!artwork || !user) return;
-
-    // Handle direct purchase
-    try {
-      await artworksApi.purchase(artwork.id);
-
-      setPurchaseConfirmOpen(false);
-      toast({
-        title: "Purchase successful! 🎉",
-        description: `You are now the owner of ${artwork.title}`,
-      });
-
-      // Refresh the page to show new ownership
-      fetchArtwork();
-    } catch (error: any) {
-      setPurchaseConfirmOpen(false);
-      const errorMessage = error.status === 0
-        ? "Unable to connect to server. Please check your connection."
-        : error.message || "Failed to process your request. Please try again.";
-      toast({
-        title: "Transaction failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      setIsProcessing(false);
     }
   };
 
+  /* Place bid */
   const handlePlaceBid = async () => {
-    if (!user || !artwork || !artwork.auction) return;
-
-    // Check if auction has ended
-    if (artwork.auction.end_time && new Date(artwork.auction.end_time).getTime() <= Date.now()) {
+    if (!requireWallet() || !nft) return;
+    const bidVal = parseFloat(bidAmount);
+    if (isNaN(bidVal) || bidVal <= 0) {
       toast({
-        title: "Auction ended",
-        description: "This auction has ended. Bidding is no longer available.",
+        title: "Invalid bid",
+        description: "Please enter a valid bid amount",
         variant: "destructive",
       });
       return;
     }
-
-    const bidIncrement = parseFloat(bidAmount || "0");
-    
-    // If user has an existing bid, calculate the total new bid amount
-    let totalBidValue: number;
-    if (userActiveBid) {
-      // User is adding to existing bid
-      if (isNaN(bidIncrement) || bidIncrement <= 0) {
-        toast({
-          title: "Invalid bid amount",
-          description: "Please enter a positive amount to add to your bid",
-          variant: "destructive",
-        });
-        return;
-      }
-      totalBidValue = userActiveBid.amount + bidIncrement;
-    } else {
-      // New bid - the amount entered is the total bid
-      if (isNaN(bidIncrement) || bidIncrement <= 0) {
-        toast({
-          title: "Invalid bid amount",
-          description: "Please enter a positive bid amount",
-          variant: "destructive",
-        });
-        return;
-      }
-      totalBidValue = bidIncrement;
-    }
-    
-    const minBid = (artwork.auction.current_bid ?? artwork.auction.start_price ?? 0) + 1;
-
-    // Frontend validation: bid must be >= minBid (consistent with backend which uses >)
-    // Backend will reject if bid <= current_bid, so we require >= minBid here
-    if (isNaN(totalBidValue) || totalBidValue < minBid) {
-      toast({
-        title: "Invalid bid amount",
-        description: `Minimum bid is $${formatCurrency(minBid)}. Your total bid would be $${formatCurrency(totalBidValue)}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Check balance - for existing bids, only check the additional amount needed
-    const amountNeeded = userActiveBid ? bidIncrement : totalBidValue;
-    if (amountNeeded > userBalance) {
-      toast({
-        title: "Insufficient balance",
-        description: `You need $${formatCurrency(amountNeeded)} but only have $${formatCurrency(userBalance)}`,
-        variant: "destructive",
-      });
-      return;
-    }
-
+    setIsProcessing(true);
     try {
-      // Calculate expiry date if specified
-      // If user has existing bid and didn't change expiry, preserve the existing expiry
-      let expiryDate: string | undefined = undefined;
-      
-      if (bidExpiry) {
-        // Handle special marker value "999999" for "until auction ends" option
-        let expiryHours: number;
-        if (bidExpiry === "999999") {
-          // Use the actual remaining hours until auction ends
-          if (artwork.auction?.end_time) {
-            const auctionEnd = new Date(artwork.auction.end_time);
-            const now = new Date();
-            expiryHours = (auctionEnd.getTime() - now.getTime()) / (1000 * 60 * 60);
-          } else {
-            expiryHours = 24; // Fallback
-          }
-        } else {
-          expiryHours = parseFloat(bidExpiry);
-        }
-        
-        if (!isNaN(expiryHours) && expiryHours > 0) {
-          const exp = new Date();
-          exp.setTime(exp.getTime() + (expiryHours * 60 * 60 * 1000)); // Add hours in milliseconds
-          
-          // Ensure expiry doesn't exceed auction end time
-          if (artwork.auction?.end_time) {
-            const auctionEnd = new Date(artwork.auction.end_time);
-            if (exp > auctionEnd) {
-              expiryDate = auctionEnd.toISOString();
-            } else {
-              expiryDate = exp.toISOString();
-            }
-          } else {
-            expiryDate = exp.toISOString();
-          }
-        }
-      } else if (userActiveBid?.expires_at) {
-        // If no expiry specified but user has existing bid, preserve existing expiry
-        expiryDate = userActiveBid.expires_at;
-      }
-
-      // Place bid using Flask API - send the total bid amount
-      const result = await artworksApi.placeBid(artwork.id, totalBidValue, expiryDate);
-
+      const marketplace = new ethers.Contract(
+        POKECHAIN_MARKETPLACE_ADDRESS,
+        PokechainMarketplaceAbi,
+        walletSigner
+      );
+      const tx = await marketplace.placeBid(nft.tokenId, {
+        value: ethers.parseEther(bidAmount),
+      });
       toast({
-        title: userActiveBid ? "Bid updated successfully! 🎉" : "Bid placed successfully! 🎉",
-        description: userActiveBid 
-          ? `Added $${formatCurrency(bidIncrement)} to your bid. New total: $${formatCurrency(totalBidValue)}`
-          : `Your bid of $${formatCurrency(totalBidValue)} has been placed`,
+        title: "Bid submitted",
+        description: "Waiting for confirmation...",
+      });
+      await tx.wait();
+      toast({
+        title: "Bid placed!",
+        description: `Your bid of ${bidAmount} ETH has been placed`,
       });
 
-      setBidDialogOpen(false);
-      
-      // Refresh artwork data
-      await fetchArtwork();
-    } catch (error: any) {
-      const errorMessage = error.status === 0
-        ? "Unable to connect to server. Please check your connection."
-        : error.message || "Failed to place your bid. Please try again.";
+      // Send local notification
+      localNotifications.notifyBid(nft.tokenId, bidAmount);
+
+      setShowBidDialog(false);
+      setBidAmount("");
+      // Small delay to let RPC node index the new block
+      await new Promise(r => setTimeout(r, 2000));
+      refetch();
+    } catch (err: any) {
       toast({
         title: "Bid failed",
-        description: errorMessage,
+        description: err.reason || err.message || "Transaction failed",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const handleFavorite = async () => {
-    if (!user) {
-      setAuthDialogOpen(true);
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to like artworks",
-      });
-      return;
-    }
-
-    // Optimistic update - update UI immediately
-    const previousState = isFavorited;
-    const previousFavorites = artwork?.favorites || 0;
-    setIsFavorited(!isFavorited);
-    if (artwork) {
-      setArtwork({
-        ...artwork,
-        favorites: !isFavorited ? previousFavorites + 1 : previousFavorites - 1,
-      });
-    }
-
-    try {
-      const response = await artworksApi.toggleFavorite(
-        artwork?.id || id!,
-        !previousState
-      );
-      setIsFavorited(response.favorited);
-      if (artwork) {
-        setArtwork({
-          ...artwork,
-          favorites: response.favorites,
-        });
-      }
-      toast({ title: response.favorited ? "Liked" : "Unliked" });
-    } catch (error: any) {
-      // Rollback on error
-      setIsFavorited(previousState);
-      if (artwork) {
-        setArtwork({
-          ...artwork,
-          favorites: previousFavorites,
-        });
-      }
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update likes. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleWatch = async () => {
-    if (!user) {
-      setAuthDialogOpen(true);
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to watch artworks",
-      });
-      return;
-    }
-
-    // Optimistic update
-    const previousState = isWatching;
-    setIsWatching(!isWatching);
-
-    try {
-      const response = await artworksApi.toggleWatch(
-        artwork?.id || id!,
-        !previousState
-      );
-      setIsWatching(response.watching);
-      toast({ title: response.watching ? "Added to watchlist" : "Removed from watchlist" });
-    } catch (error: any) {
-      // Rollback on error
-      setIsWatching(previousState);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update watchlist. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleEditPrice = () => {
-    if (!artwork) return;
-    setNewPrice(artwork.price.toString());
-    setEditPriceDialogOpen(true);
-  };
-
-  const handleSavePrice = async () => {
-    if (!artwork || !newPrice) return;
-
-    const priceValue = parseFloat(newPrice);
-    if (isNaN(priceValue) || priceValue <= 0) {
+  /* List for sale */
+  const handleListForSale = async () => {
+    if (!requireWallet() || !nft) return;
+    const priceVal = parseFloat(listPrice);
+    if (isNaN(priceVal) || priceVal <= 0) {
       toast({
         title: "Invalid price",
-        description: "Please enter a valid price greater than 0",
+        description: "Please enter a valid price",
         variant: "destructive",
       });
       return;
     }
-
+    setIsProcessing(true);
     try {
-      await artworksApi.update(artwork.id, { price: priceValue });
-      setArtwork({ ...artwork, price: priceValue });
-      setEditPriceDialogOpen(false);
+      await ensureApproval(walletSigner);
+      const marketplace = new ethers.Contract(
+        POKECHAIN_MARKETPLACE_ADDRESS,
+        PokechainMarketplaceAbi,
+        walletSigner
+      );
+      const tx = await marketplace.listItem(
+        nft.tokenId,
+        ethers.parseEther(listPrice)
+      );
       toast({
-        title: "Price updated",
-        description: `Price updated to $${formatCurrency(priceValue)}`,
+        title: "Listing submitted",
+        description: "Waiting for confirmation...",
       });
-    } catch (error: any) {
+      await tx.wait();
       toast({
-        title: "Error",
-        description: error.message || "Failed to update price",
+        title: "Listed for sale!",
+        description: `${nft.name} listed for ${listPrice} ETH`,
+      });
+
+      // Send local notification
+      localNotifications.notifyListed(nft.tokenId, listPrice);
+
+      setShowListDialog(false);
+      setListPrice("");
+      // Small delay to let RPC node index the new block
+      await new Promise(r => setTimeout(r, 2000));
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Listing failed",
+        description: err.reason || err.message || "Transaction failed",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const handleEditDetails = () => {
-    if (!artwork) return;
-    setNewTitle(artwork.title);
-    setNewDescription(artwork.description || "");
-    setEditDetailsDialogOpen(true);
-  };
-
-  const handleSaveDetails = async () => {
-    if (!artwork || !newTitle.trim()) {
+  /* Create auction */
+  const handleCreateAuction = async () => {
+    if (!requireWallet() || !nft) return;
+    const startP = parseFloat(auctionStartPrice);
+    const dur = parseInt(auctionDuration);
+    if (isNaN(startP) || startP <= 0 || isNaN(dur) || dur <= 0) {
       toast({
         title: "Invalid input",
-        description: "Title cannot be empty",
+        description: "Please enter valid price and duration",
         variant: "destructive",
       });
       return;
     }
-
+    setIsProcessing(true);
     try {
-      await artworksApi.update(artwork.id, {
-        title: newTitle.trim(),
-        description: newDescription.trim()
-      });
-      setArtwork({ 
-        ...artwork, 
-        title: newTitle.trim(),
-        description: newDescription.trim()
-      });
-      setEditDetailsDialogOpen(false);
+      await ensureApproval(walletSigner);
+      const marketplace = new ethers.Contract(
+        POKECHAIN_MARKETPLACE_ADDRESS,
+        PokechainMarketplaceAbi,
+        walletSigner
+      );
+      const tx = await marketplace.createAuction(
+        nft.tokenId,
+        ethers.parseEther(auctionStartPrice),
+        dur * 3600
+      );
       toast({
-        title: "Details updated",
-        description: "Artwork details have been updated successfully",
+        title: "Auction submitted",
+        description: "Waiting for confirmation...",
       });
-    } catch (error: any) {
+      await tx.wait();
       toast({
-        title: "Error",
-        description: error.message || "Failed to update details",
-        variant: "destructive",
+        title: "Auction created!",
+        description: `${nft.name} is now up for auction`,
       });
-    }
-  };
-
-  const handleListForSale = () => {
-    setListForSaleDialogOpen(true);
-  };
-
-  const handleDelistClick = () => {
-    setDelistConfirmOpen(true);
-  };
-
-  const confirmDelist = async () => {
-    if (!user || !isOwner || !artwork) {
-      toast({
-        title: "Unauthorized",
-        description: "Only the owner can delist this artwork",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await artworksApi.delist(artwork.id);
-      toast({
-        title: "Delisted successfully",
-        description: auctionIsActive
-          ? "Your auction has been cancelled and all bids refunded"
-          : "Your artwork has been removed from sale",
-      });
-      setDelistConfirmOpen(false);
-      await fetchArtwork();
-    } catch (error: any) {
-      // Error already handled by toast
-      setDelistConfirmOpen(false);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to delist artwork",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleSaveListForSale = async () => {
-    if (!artwork) return;
-
-    if (listingType === "fixed") {
-      if (!salePrice || parseFloat(salePrice) <= 0) {
-        toast({
-          title: "Invalid price",
-          description: "Please enter a valid price greater than 0",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (parseFloat(salePrice) > 1000000) {
-        toast({
-          title: "Price too high",
-          description: "Price cannot exceed $1,000,000",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (!fixedPriceExpiry) {
-        toast({
-          title: "Expiry required",
-          description: "Please select a listing expiry duration or choose 'Never expires'",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
-
-    if (listingType === "auction") {
-      if (!startingBid || parseFloat(startingBid) <= 0) {
-        toast({
-          title: "Invalid starting bid",
-          description: "Please enter a valid starting bid greater than 0",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (reservePrice && parseFloat(reservePrice) > 0) {
-        if (parseFloat(reservePrice) < parseFloat(startingBid)) {
-          toast({
-            title: "Invalid reserve price",
-            description: "Reserve price must be greater than or equal to starting bid",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
-    }
-
-    try {
-      const payload: any = {
-        type: listingType,
-      };
-
-      if (listingType === "fixed") {
-        payload.price = parseFloat(salePrice);
-        // Only add duration if not "never"
-        if (fixedPriceExpiry !== "never") {
-          payload.duration_hours = parseInt(fixedPriceExpiry);
-        }
-      } else {
-        payload.start_price = parseFloat(startingBid);
-        payload.duration_hours = parseInt(auctionDuration);
-        // Add reserve price if provided
-        if (reservePrice && parseFloat(reservePrice) > 0) {
-          payload.reserve_price = parseFloat(reservePrice);
-        }
-      }
-
-      await artworksApi.listForSale(artwork.id, payload);
-
-      toast({
-        title: "Artwork listed!",
-        description: `Your artwork is now listed as ${listingType === "auction" ? "a timed auction" : "a fixed price listing"}`,
-      });
-
-      setListForSaleDialogOpen(false);
-      setSalePrice("");
-      setFixedPriceExpiry("");
-      setStartingBid("");
-      setReservePrice("");
+      setShowAuctionDialog(false);
+      setAuctionStartPrice("");
       setAuctionDuration("24");
-      await fetchArtwork();
-    } catch (error: any) {
+      // Small delay to let RPC node index the new block
+      await new Promise(r => setTimeout(r, 2000));
+      refetch();
+    } catch (err: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to list artwork",
+        title: "Auction creation failed",
+        description: err.reason || err.message || "Transaction failed",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  const isArtist = user && artwork && artwork.artist.id === user.id;
-  const isSold = artwork && artwork.artist.id !== artwork.owner.id;
-  const canEditDetails = isArtist && !isSold;
-  const isOwner = user && artwork && artwork.owner.id === user.id;
-  const auctionIsActive = Boolean(artwork?.auction && artwork.auction.status === "open");
-  const isDisplayOnly = artwork && !Boolean(artwork.is_listed);
+  /* Cancel listing */
+  const handleCancelListing = async () => {
+    if (!requireWallet() || !nft || !walletSigner) return;
+    setIsProcessing(true);
+    try {
+      const marketplace = new ethers.Contract(
+        POKECHAIN_MARKETPLACE_ADDRESS,
+        PokechainMarketplaceAbi,
+        walletSigner
+      );
+      const tx = await marketplace.cancelListing(nft.tokenId);
+      toast({
+        title: "Cancellation submitted",
+        description: "Waiting for confirmation...",
+      });
+      await tx.wait();
+      toast({
+        title: "Listing cancelled",
+        description: `${nft.name} has been delisted`,
+      });
+      setShowCancelListingDialog(false);
+      // Small delay to let RPC node index the new block
+      await new Promise(r => setTimeout(r, 2000));
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Cancellation failed",
+        description: err.reason || err.message || "Transaction failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /* Cancel auction */
+  const handleCancelAuction = async () => {
+    if (!requireWallet() || !nft || !walletSigner) return;
+    setIsProcessing(true);
+    try {
+      const marketplace = new ethers.Contract(
+        POKECHAIN_MARKETPLACE_ADDRESS,
+        PokechainMarketplaceAbi,
+        walletSigner
+      );
+      const tx = await marketplace.cancelAuction(nft.tokenId);
+      toast({
+        title: "Cancellation submitted",
+        description: "Waiting for confirmation...",
+      });
+      await tx.wait();
+      toast({
+        title: "Auction cancelled",
+        description: `${nft.name} auction has been cancelled`,
+      });
+      setShowCancelAuctionDialog(false);
+      // Small delay to let RPC node index the new block
+      await new Promise(r => setTimeout(r, 2000));
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Cancellation failed",
+        description: err.reason || err.message || "Transaction failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /* Update listing price */
+  const handleUpdatePrice = async () => {
+    if (!requireWallet() || !nft) return;
+    const priceVal = parseFloat(newPrice);
+    if (isNaN(priceVal) || priceVal <= 0) {
+      toast({
+        title: "Invalid price",
+        description: "Please enter a valid price",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      const marketplace = new ethers.Contract(
+        POKECHAIN_MARKETPLACE_ADDRESS,
+        PokechainMarketplaceAbi,
+        walletSigner
+      );
+      const tx = await marketplace.updateListing(
+        nft.tokenId,
+        ethers.parseEther(newPrice)
+      );
+      toast({
+        title: "Price update submitted",
+        description: "Waiting for confirmation...",
+      });
+      await tx.wait();
+      toast({
+        title: "Price updated!",
+        description: `New price: ${newPrice} ETH`,
+      });
+      setShowUpdatePriceDialog(false);
+      setNewPrice("");
+      // Small delay to let RPC node index the new block
+      await new Promise(r => setTimeout(r, 2000));
+      refetch();
+    } catch (err: any) {
+      toast({
+        title: "Price update failed",
+        description: err.reason || err.message || "Transaction failed",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  /* ─── render ────────────────────────────────────────────── */
 
   if (loading) {
     return (
       <>
         <Navbar />
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-muted-foreground">Loading...</p>
+          <div className="text-center space-y-3">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-muted-foreground">Loading NFT data from chain...</p>
+          </div>
         </div>
       </>
     );
   }
 
-  if (!artwork) {
+  if (error || !nft) {
     return (
       <>
         <Navbar />
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-muted-foreground">Artwork not found</p>
+          <div className="text-center space-y-4">
+            <p className="text-2xl font-bold">NFT not found</p>
+            <p className="text-muted-foreground">
+              {error || "This token may not exist on-chain yet."}
+            </p>
+            <Button variant="outline" onClick={() => navigate("/")}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Discover
+            </Button>
+          </div>
         </div>
       </>
     );
   }
-
-  const endTimeStr = artwork.auction 
-    ? (() => {
-        // Check if auction is closed
-        if (artwork.auction.status === "closed") {
-          return "Auction Ended";
-        }
-        const endTime = new Date(artwork.auction.end_time);
-        const timeDiff = endTime.getTime() - currentTime.getTime();
-        // If time has passed but status is still open, show "Ending..."
-        if (timeDiff <= 0) {
-          return "Ending...";
-        }
-        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
-        return `${hours}h ${minutes}m ${seconds}s`;
-      })()
-    : null;
 
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
-          {/* Back Button */}
+          {/* Back button */}
           <Button
             variant="ghost"
             className="mb-6 gap-2"
@@ -801,1129 +645,1101 @@ const ArtDetail = () => {
           </Button>
 
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Left: Image */}
+            {/* ────── Left: Image ────── */}
             <div className="space-y-4">
               <Card className="overflow-hidden border-border bg-card">
-                <div className="aspect-square relative">
-                  <img
-                    src={artwork.image_url}
-                    alt={artwork.title}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Favorite button overlay */}
-                  {user ? (
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm hover:bg-white border border-border/20 shadow-md"
-                      onClick={handleFavorite}
-                      title={isFavorited ? "Unlike" : "Like"}
-                    >
-                      <Heart className={`w-4 h-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-900'}`} />
-                    </Button>
+                <div className="aspect-square relative bg-muted flex items-center justify-center">
+                  {nft.image ? (
+                    <img
+                      src={nft.image}
+                      alt={nft.name}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
+                    <div className="text-6xl">❓</div>
+                  )}
+
+                  {/* Favorite overlay */}
+                  <div className="absolute top-3 right-3 flex items-center gap-0 z-10">
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm hover:bg-white border border-border/20 shadow-md"
-                      onClick={() => setAuthDialogOpen(true)}
-                      title="Sign in to like"
+                      className="bg-white/90 backdrop-blur-sm hover:bg-white border border-border/20 shadow-md rounded-r-none"
+                      onClick={async () => {
+                        if (!connectedWallet) {
+                          toast({
+                            title: "Connect wallet",
+                            description: "Please connect your wallet to save favorites",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        // Prevent liking your own NFT
+                        if (isOwner) {
+                          toast({
+                            title: "Can't like your own NFT",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+
+                        try {
+                          if (isFavorited) {
+                            await nftLikesApi.unlike(Number(tokenId), connectedWallet);
+                            setIsFavorited(false);
+                            setLikeCount((c) => Math.max(0, c - 1));
+                            toast({ title: "Removed from favorites" });
+                          } else {
+                            await nftLikesApi.like(Number(tokenId), connectedWallet, nft.owner);
+                            setIsFavorited(true);
+                            setLikeCount((c) => c + 1);
+                            toast({ title: "Added to favorites" });
+                          }
+                        } catch {
+                          // Fallback to localStorage if backend fails
+                          const key = `ethermon_favorites_${connectedWallet}`;
+                          try {
+                            const stored = localStorage.getItem(key);
+                            const favorites = stored ? JSON.parse(stored) : [];
+                            const tid = Number(tokenId);
+                            if (isFavorited) {
+                              localStorage.setItem(key, JSON.stringify(favorites.filter((id: number) => id !== tid)));
+                            } else {
+                              localStorage.setItem(key, JSON.stringify([...favorites, tid]));
+                            }
+                            setIsFavorited(!isFavorited);
+                            toast({ title: isFavorited ? "Removed from favorites" : "Added to favorites" });
+                          } catch { }
+                        }
+                      }}
                     >
-                      <Heart className="w-4 h-4 text-gray-900" />
+                      <Heart
+                        className={`w-4 h-4 ${isFavorited
+                          ? "fill-red-500 text-red-500"
+                          : "text-gray-900"
+                          }`}
+                      />
                     </Button>
+                    <button
+                      className="h-9 min-w-[36px] px-2 flex items-center justify-center text-sm font-semibold bg-white/90 backdrop-blur-sm border border-l-0 border-border/20 shadow-md rounded-r-md text-gray-700 hover:bg-white transition-colors cursor-pointer"
+                      onClick={async () => {
+                        if (!tokenId) return;
+                        try {
+                          const { likers: data } = await nftLikesApi.getLikers(Number(tokenId));
+                          setLikers(data);
+                        } catch {
+                          setLikers([]);
+                        }
+                        setLikersDialogOpen(true);
+                      }}
+                      title="View who liked this NFT"
+                    >
+                      {likeCount}
+                    </button>
+                  </div>
+
+                  {/* Auction timer overlay */}
+                  {isAuction && nft.auctionEndTime > 0 && (
+                    <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-foreground/90 backdrop-blur-sm rounded-full flex items-center gap-2 text-background">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span className="text-sm font-medium">
+                        {formatTimeRemaining(nft.auctionEndTime)}
+                      </span>
+                    </div>
                   )}
+
+                  {/* Etherscan link overlay */}
+                  <a
+                    href={etherscanTokenUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-3 right-3 p-2 bg-background/80 backdrop-blur-sm rounded-md border border-border hover:bg-background transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                  </a>
                 </div>
               </Card>
             </div>
 
-            {/* Right: Details */}
+            {/* ────── Right: Details ────── */}
             <div className="space-y-6">
-              {/* Collection & Title */}
+              {/* Name & identifiers */}
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <img
-                    src={artwork.artist.avatar_url}
-                    alt={artwork.artist.display_name || artwork.artist.username}
-                    className="w-6 h-6 rounded-full"
-                  />
-                  <span className="text-sm text-primary font-medium">
-                    {artwork.artist.display_name || artwork.artist.username}
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <span className="text-xs font-mono bg-muted px-2 py-1 rounded-md border border-border">
+                    Token #{nft.tokenId}
                   </span>
-                </div>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex flex-col">
-                  <h1 className="text-4xl font-bold">{artwork.title}</h1>
-                    <p className="text-xs text-muted-foreground mt-1">#{artwork.id}</p>
-                  </div>
-                  {canEditDetails && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={handleEditDetails}
-                      className="gap-1"
+                  {rarity && (
+                    <span
+                      className={`text-xs font-semibold px-2 py-1 rounded-md border ${rarityStyle(
+                        rarity
+                      )}`}
                     >
-                      <Edit className="w-4 h-4" />
-                      Edit Details
-                    </Button>
+                      {rarity}
+                    </span>
+                  )}
+                  {isListed && (
+                    <Badge variant="secondary" className="text-xs">
+                      Listed
+                    </Badge>
+                  )}
+                  {isAuction && (
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-accent text-accent-foreground"
+                    >
+                      Auction
+                    </Badge>
                   )}
                 </div>
-                <p className="text-muted-foreground">
+
+                <h1 className="text-3xl sm:text-4xl font-bold mb-1">
+                  {nft.name}
+                </h1>
+
+                {/* Types */}
+                <div className="flex gap-1.5 mb-2 mt-2">
+                  {type && (
+                    <span
+                      className="text-xs font-medium px-2.5 py-1 rounded-full text-white"
+                      style={{ backgroundColor: typeColor(type) }}
+                    >
+                      {type}
+                    </span>
+                  )}
+                  {secondaryType && secondaryType !== "None" && (
+                    <span
+                      className="text-xs font-medium px-2.5 py-1 rounded-full text-white"
+                      style={{ backgroundColor: typeColor(secondaryType) }}
+                    >
+                      {secondaryType}
+                    </span>
+                  )}
+                </div>
+
+                {generation && (
+                  <p className="text-sm text-muted-foreground">
+                    Gen {generation} · Pokédex #{nft.pokemonId}
+                  </p>
+                )}
+
+                {/* Owner */}
+                <p className="text-sm text-muted-foreground mt-3">
                   Owned by{" "}
-                  <span 
-                    className="text-primary cursor-pointer hover:underline"
-                    onClick={() => navigate(`/profile/${artwork.owner.username || artwork.owner.id}`)}
+                  <span
+                    className="text-primary font-medium hover:underline cursor-pointer"
+                    onClick={() => navigate(`/profile/${nft.owner}`)}
                   >
-                    {artwork.owner.display_name || artwork.owner.username}
+                    {isOwner ? "you" : truncateAddress(nft.owner)}
                   </span>
                 </p>
               </div>
 
-              {/* Stats */}
-              <div className="flex gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Views: </span>
-                  <span className="font-medium">{artwork.views}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Likes: </span>
-                  <span className="font-medium">{artwork.favorites}</span>
-                </div>
-              </div>
-
-              {/* Price Card */}
+              {/* ── Price / Action Card ── */}
               <Card className="border-border bg-card">
                 <CardContent className="p-6">
-                  {isDisplayOnly ? (
+                  {/* Not listed */}
+                  {nft.marketStatus === "none" && (
                     <>
                       <div className="mb-4 text-center py-4">
-                        <p className="text-sm text-muted-foreground mb-2">
-                          This artwork is not listed for sale
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Not listed on marketplace
                         </p>
                         {isOwner && (
                           <p className="text-xs text-muted-foreground">
-                            You can list it for sale at any time
+                            List or auction this NFT to sell it
                           </p>
                         )}
                       </div>
                       {isOwner ? (
-                        <Button
-                          className="w-full bg-gradient-primary hover:bg-gradient-hover gap-2"
-                          onClick={handleListForSale}
-                        >
-                          <DollarSign className="w-4 h-4" />
-                          List
-                        </Button>
-                      ) : user ? (
-                        <>
-                          {/* Show watchlist button for unlisted items - users might want to track them */}
+                        <div className="flex gap-3">
+                          <Button
+                            className="flex-1 bg-gradient-primary hover:bg-gradient-hover gap-2"
+                            onClick={() => setShowListDialog(true)}
+                          >
+                            <Tag className="w-4 h-4" />
+                            List
+                          </Button>
                           <Button
                             variant="outline"
-                            className="w-full mt-2 gap-2"
-                            onClick={handleWatch}
-                            title={isWatching ? "Remove from watchlist" : "Add to watchlist to get notified if it becomes available"}
+                            className="flex-1 gap-2"
+                            onClick={() => setShowAuctionDialog(true)}
                           >
-                            <Eye className={`w-4 h-4 ${isWatching ? 'text-primary' : ''}`} />
-                            {isWatching ? "Remove from Watchlist" : "Add to Watchlist"}
+                            <Gavel className="w-4 h-4" />
+                            Auction
                           </Button>
-                        </>
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      {artwork.auction && (
-                        <div className="mb-4 space-y-2">
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm text-muted-foreground">
-                              {artwork.auction.status === "closed" ? "Auction Status" : "Auction ends in"}
-                            </p>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm"
-                                    onClick={() => setAuctionExplainerOpen(true)}
-                                    className="text-xs text-primary hover:text-primary/80"
-                                  >
-                                    How auctions work
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-gray-900 text-white border-gray-700 dark:bg-gray-100 dark:text-gray-900">
-                                  <p className="font-medium">Click to learn more about how auctions work on ArtMart</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                          <p className="text-lg font-bold text-primary">
-                            {endTimeStr}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Ends: {new Date(artwork.auction.end_time).toLocaleString()}
-                          </p>
                         </div>
-                      )}
-                      <div className="mb-4">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="text-sm text-muted-foreground">
-                            {artwork.auction ? (artwork.auction.current_bid ? "Current Bid" : "Starting Bid") : "Price"}
-                          </p>
-                          {user && artwork.owner.id === user.id && !artwork.auction && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={handleEditPrice}
-                              className="gap-1"
-                            >
-                              <Edit className="w-3 h-3" />
-                              Edit
-                            </Button>
-                          )}
-                        </div>
-                        <p className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                          ${formatCurrency(artwork.auction ? (artwork.auction.current_bid ?? artwork.auction.start_price ?? 0) : (artwork.price || 0))}
+                      ) : (
+                        <p className="text-center text-sm text-muted-foreground">
+                          Not for sale
                         </p>
-                        {artwork.auction?.highest_bidder && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Bidded by {artwork.auction.highest_bidder.display_name || artwork.auction.highest_bidder.username}
-                          </p>
-                       )}
+                      )}
+                    </>
+                  )}
+
+                  {/* Listed — fixed price */}
+                  {isListed && (
+                    <>
+                      <div className="mb-4">
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Price
+                        </p>
+                        <p className="text-3xl font-bold">
+                          {formatPrice(nft.price)}{" "}
+                          <span className="text-lg text-muted-foreground">
+                            ETH
+                          </span>
+                        </p>
                       </div>
-                       <div className="flex gap-3">
-                         {artwork.owner.id === user?.id ? (
-                           <Button
-                             variant="destructive"
-                             className="flex-1"
-                             onClick={handleDelistClick}
-                           >
-                             {artwork.auction ? "Cancel Auction" : "Delist"}
-                           </Button>
-                         ) : (
-                           <Button
-                             className="flex-1 bg-gradient-primary hover:bg-gradient-hover"
-                             onClick={handlePurchase}
-                           >
-                             {artwork.auction ? (userActiveBid ? "Update Bid" : "Place Bid") : "Buy Now"}
-                           </Button>
-                         )}
-                         {user && (
-                           <>
-                             <Button 
-                               variant="outline" 
-                               size="icon"
-                               onClick={handleFavorite}
-                               title={isFavorited ? "Unlike" : "Like"}
-                             >
-                               <Heart className={`w-4 h-4 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`} />
-                             </Button>
-                             <Button 
-                               variant="outline" 
-                               size="icon"
-                               onClick={handleWatch}
-                               title={isWatching ? "Remove from watchlist" : "Add to watchlist"}
-                             >
-                               {isWatching ? (
-                                 <Eye className="w-4 h-4 text-primary" />
-                               ) : (
-                                 <Eye className="w-4 h-4" />
-                               )}
-                             </Button>
-                           </>
-                         )}
-                         {!user && (
-                           <>
-                             <Button 
-                               variant="outline" 
-                               size="icon"
-                               onClick={() => setAuthDialogOpen(true)}
-                               title="Sign in to like"
-                             >
-                               <Heart className="w-4 h-4" />
-                             </Button>
-                           </>
+                      {isOwner ? (
+                        <div className="flex gap-3">
+                          <Button
+                            variant="outline"
+                            className="flex-1 gap-2"
+                            onClick={() => {
+                              setNewPrice(nft.price);
+                              setShowUpdatePriceDialog(true);
+                            }}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                            Update Price
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            className="flex-1 gap-2"
+                            onClick={() => setShowCancelListingDialog(true)}
+                          >
+                            <X className="w-4 h-4" />
+                            Cancel Listing
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          className="w-full bg-gradient-primary hover:bg-gradient-hover text-lg py-6"
+                          onClick={() => setShowBuyDialog(true)}
+                        >
+                          Buy Now
+                        </Button>
+                      )}
+                    </>
+                  )}
+
+                  {/* Auction */}
+                  {isAuction && nft.auction && (
+                    <>
+                      {/* Countdown */}
+                      <div className="mb-4 space-y-1">
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground">
+                            {nft.auctionEndTime > 0 &&
+                              nft.auctionEndTime * 1000 > Date.now()
+                              ? "Auction ends in"
+                              : "Auction ended"}
+                          </p>
+                          <div className="flex items-center gap-1.5 text-foreground">
+                            <Clock className="w-4 h-4" />
+                            <span className="text-sm font-semibold">
+                              {formatTimeRemaining(nft.auctionEndTime)}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Ends:{" "}
+                          {new Date(
+                            nft.auctionEndTime * 1000
+                          ).toLocaleString()}
+                        </p>
+                      </div>
+
+                      {/* Bid info */}
+                      <div className="mb-4">
+                        <p className="text-sm text-muted-foreground mb-1">
+                          {parseFloat(nft.auction.highestBid) > 0
+                            ? "Current Bid"
+                            : "Starting Price"}
+                        </p>
+                        <p className="text-3xl font-bold">
+                          {parseFloat(nft.auction.highestBid) > 0
+                            ? formatPrice(nft.auction.highestBid)
+                            : formatPrice(nft.auction.startingPrice)}{" "}
+                          <span className="text-lg text-muted-foreground">
+                            ETH
+                          </span>
+                        </p>
+                        {parseFloat(nft.auction.highestBid) > 0 &&
+                          nft.auction.highestBidder !==
+                          ethers.ZeroAddress && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              by{" "}
+                              <a
+                                href={`${BLOCK_EXPLORER}/address/${nft.auction.highestBidder}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline"
+                              >
+                                {connectedWallet &&
+                                  nft.auction.highestBidder.toLowerCase() ===
+                                  connectedWallet
+                                  ? "you"
+                                  : truncateAddress(
+                                    nft.auction.highestBidder
+                                  )}
+                              </a>
+                            </p>
                           )}
-                           <Button 
-                             variant="outline" 
-                             size="icon"
-                             onClick={() => {
-                               navigator.clipboard.writeText(window.location.href);
-                               toast({
-                                 title: "Link copied!",
-                                 description: "Artwork link copied to clipboard",
-                               });
-                             }}
-                             title="Share artwork"
-                           >
-                             <Share2 className="w-4 h-4" />
-                           </Button>
-                       </div>
+                      </div>
+
+                      {isOwner ? (
+                        <Button
+                          variant="destructive"
+                          className="w-full gap-2"
+                          onClick={() => setShowCancelAuctionDialog(true)}
+                        >
+                          <X className="w-4 h-4" />
+                          Cancel Auction
+                        </Button>
+                      ) : (
+                        <Button
+                          className="w-full bg-gradient-primary hover:bg-gradient-hover text-lg py-6"
+                          onClick={() => {
+                            setBidAmount("");
+                            setShowBidDialog(true);
+                          }}
+                          disabled={
+                            nft.auctionEndTime > 0 &&
+                            nft.auctionEndTime * 1000 <= Date.now()
+                          }
+                        >
+                          Place Bid
+                        </Button>
+                      )}
                     </>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Tabs */}
-              <Tabs defaultValue="details" className="w-full mt-6">
+
+              {/* Share button */}
+              <Button
+                variant="outline"
+                className="gap-2"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast({
+                    title: "Link copied!",
+                    description: "NFT link copied to clipboard",
+                  });
+                }}
+              >
+                <Share2 className="w-4 h-4" />
+                Share
+              </Button>
+
+              {/* ── Tabs ── */}
+              <Tabs defaultValue="details" className="w-full mt-2">
                 <TabsList className="w-full justify-start bg-transparent border-b border-border rounded-none h-auto p-0">
-                  <TabsTrigger 
+                  <TabsTrigger
                     value="details"
                     className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3"
                   >
                     Details
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="activity"
+                  <TabsTrigger
+                    value="contract"
                     className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3"
                   >
-                    Activity
+                    Contract Info
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="price"
-                    className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3"
-                  >
-                    Price History
-                  </TabsTrigger>
-                  {artwork.auction && (
-                    <TabsTrigger 
+                  {nft.marketStatus === "auction" && (
+                    <TabsTrigger
                       value="bids"
                       className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3"
                     >
-                      Bids
+                      Bids{nft.bidHistory && nft.bidHistory.length > 0 ? ` (${nft.bidHistory.length})` : ""}
                     </TabsTrigger>
                   )}
                 </TabsList>
+
+                {/* Details tab */}
                 <TabsContent value="details" className="space-y-4 mt-4">
+                  {/* Description */}
                   <Card className="border-border bg-card">
                     <CardContent className="p-6">
                       <h3 className="font-semibold mb-3">Description</h3>
-                      <p className="text-muted-foreground">
-                        {artwork.description}
+                      <p className="text-muted-foreground text-sm">
+                        {nft.description || "No description available."}
                       </p>
                     </CardContent>
                   </Card>
 
+                  {/* Attributes */}
+                  {nft.attributes.length > 0 && (
+                    <Card className="border-border bg-card">
+                      <CardContent className="p-6">
+                        <h3 className="font-semibold mb-3">Attributes</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {nft.attributes.map((attr, i) => (
+                            <div
+                              key={i}
+                              className="p-3 bg-muted/50 rounded-lg border border-border text-center"
+                            >
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                                {attr.trait_type}
+                              </p>
+                              <p className="font-semibold text-sm mt-1">
+                                {attr.value}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Stats bar (if available) */}
+                  {(hp || attack || defense || speed) && (
+                    <Card className="border-border bg-card">
+                      <CardContent className="p-6">
+                        <h3 className="font-semibold mb-3">Base Stats</h3>
+                        <div className="space-y-3">
+                          {[
+                            { label: "HP", value: hp },
+                            { label: "Attack", value: attack },
+                            { label: "Defense", value: defense },
+                            { label: "Speed", value: speed },
+                          ]
+                            .filter((s) => s.value !== undefined)
+                            .map((stat) => (
+                              <div key={stat.label} className="space-y-1">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">
+                                    {stat.label}
+                                  </span>
+                                  <span className="font-medium">
+                                    {stat.value}
+                                  </span>
+                                </div>
+                                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-primary rounded-full transition-all"
+                                    style={{
+                                      width: `${Math.min(
+                                        100,
+                                        (Number(stat.value) / 255) * 100
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
+
+                {/* Contract Info tab */}
+                <TabsContent value="contract" className="mt-4">
                   <Card className="border-border bg-card">
-                    <CardContent className="p-6">
-                      <h3 className="font-semibold mb-3">Details</h3>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Category</span>
-                          <Badge variant="secondary">{artwork.category}</Badge>
+                    <CardContent className="p-6 space-y-4">
+                      <h3 className="font-semibold mb-1">Contract Info</h3>
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">
+                            Token ID
+                          </span>
+                          <span className="font-mono">#{nft.tokenId}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Created</span>
-                          <span>{new Date(artwork.created_at).toLocaleDateString()}</span>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">
+                            Pokémon ID
+                          </span>
+                          <span className="font-mono">#{nft.pokemonId}</span>
                         </div>
-                        {!artwork.auction && artwork.listing_expires_at && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Listing Expires</span>
-                            <span>{new Date(artwork.listing_expires_at).toLocaleString()}</span>
-                          </div>
-                        )}
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Chain</span>
+                          <span>{CHAIN_NAME}</span>
+                        </div>
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-muted-foreground">
+                            NFT Contract
+                          </span>
+                          <a
+                            href={`${BLOCK_EXPLORER}/address/${POKECHAIN_NFT_ADDRESS}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-mono text-xs flex items-center gap-1"
+                          >
+                            {truncateAddress(POKECHAIN_NFT_ADDRESS)}
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-muted-foreground">
+                            Marketplace
+                          </span>
+                          <a
+                            href={`${BLOCK_EXPLORER}/address/${POKECHAIN_MARKETPLACE_ADDRESS}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-mono text-xs flex items-center gap-1"
+                          >
+                            {truncateAddress(POKECHAIN_MARKETPLACE_ADDRESS)}
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                        <div className="flex justify-between items-center gap-4">
+                          <span className="text-muted-foreground">Owner</span>
+                          <a
+                            href={etherscanOwnerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline font-mono text-xs flex items-center gap-1"
+                          >
+                            {truncateAddress(nft.owner)}
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-border">
+                        <a
+                          href={etherscanTokenUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline flex items-center gap-1"
+                        >
+                          View on Etherscan
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
                       </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
-                <TabsContent value="activity" className="mt-4">
-                  <>
+
+                {/* Bids tab */}
+                {nft.marketStatus === "auction" && (
+                  <TabsContent value="bids" className="mt-4">
                     <Card className="border-border bg-card">
                       <CardContent className="p-6">
-                        <h3 className="font-semibold mb-4">Activity & Bid History</h3>
-                        {artwork.activity && artwork.activity.length > 0 ? (
-                          <div className="space-y-3">
-                            {artwork.activity
-                              .filter(a => !['offer', 'offer_accepted', 'offer_declined', 'offer_cancelled'].includes(a.activity_type))
-                              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                              .slice((activityPage - 1) * ITEMS_PER_PAGE, activityPage * ITEMS_PER_PAGE)
-                              .map((activity) => (
-                              <div key={activity.id} className="border-b border-border pb-3 last:border-0">
-                                <div className="flex justify-between items-start">
-                                  <div className="flex-1">
-                                    <p className="font-medium">
-                                      {/* Listing */}
-                                      {activity.activity_type === 'listed' && (
-                                        <>
-                                          Created by{' '}
-                                          <Link to={`/profile/${artwork.artist.username}`} className="font-semibold hover:text-primary hover:underline">
-                                            {artwork.artist.display_name || artwork.artist.username}
-                                          </Link>
-                                        </>
-                                      )}
-                                      
-                                      {/* Sale - consolidated for auction_won, sold, sale, purchased */}
-                                      {/* from_user = seller, to_user = buyer */}
-                                      {(activity.activity_type === 'sold' || activity.activity_type === 'sale' || activity.activity_type === 'auction_won') && (
-                                        <>
-                                          <span className="text-green-500">Sold</span> to{' '}
-                                          <Link to={`/profile/${activity.to_user?.username}`} className="font-semibold hover:text-primary hover:underline">
-                                            {activity.to_user?.username || 'Unknown'}
-                                          </Link>
-                                          {' '}from{' '}
-                                          <Link to={`/profile/${activity.from_user?.username}`} className="font-semibold hover:text-primary hover:underline">
-                                            {activity.from_user?.username || 'Unknown'}
-                                          </Link>
-                                        </>
-                                      )}
-                                      
-                                      {/* Bids */}
-                                      {activity.activity_type === 'bid' && (
-                                        <>
-                                          <Link to={`/profile/${activity.from_user?.username}`} className="font-semibold hover:text-primary hover:underline">
-                                            {activity.from_user?.username || 'Unknown'}
-                                          </Link>
-                                          {' '}placed a <span className="text-primary">bid</span>
-                                        </>
-                                      )}
-                                      {activity.activity_type === 'bid_cancelled' && (
-                                        <>
-                                          <Link to={`/profile/${activity.from_user?.username}`} className="font-semibold hover:text-primary hover:underline">
-                                            {activity.from_user?.username || 'Unknown'}
-                                          </Link>
-                                          {' '}<span className="text-orange-500">cancelled bid</span>
-                                        </>
-                                      )}
-                                    </p>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      {new Date(activity.created_at).toLocaleString()}
-                                    </p>
-                                  </div>
-                                  {activity.price && (
-                                    <span className={`text-lg font-bold ${activity.activity_type === 'bid' ? 'text-primary' : ''}`}>
-                                      ${formatCurrency(activity.price)}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
+                        {(!nft.bidHistory || nft.bidHistory.length === 0) ? (
+                          <div className="text-center py-8">
+                            <Gavel className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                            <p className="text-muted-foreground">No bids yet</p>
+                            <p className="text-sm text-muted-foreground mt-1">Be the first to place a bid!</p>
                           </div>
                         ) : (
-                          <p className="text-muted-foreground text-center py-8">
-                            No activity yet
-                          </p>
+                          <div className="space-y-3">
+                            {[...nft.bidHistory]
+                              .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))
+                              .map((bid, index) => {
+                                const profile = bidderProfiles[bid.bidder.toLowerCase()];
+                                const displayName = connectedWallet && bid.bidder.toLowerCase() === connectedWallet
+                                  ? "You"
+                                  : profile?.display_name || profile?.username || truncateAddress(bid.bidder);
+                                const profileLink = profile?.username
+                                  ? `/profile/${profile.username}`
+                                  : `/profile/${bid.bidder}`;
+
+                                return (
+                                  <div
+                                    key={bid.transactionHash}
+                                    className={`flex items-center justify-between p-3 rounded-lg border transition-colors ${bid.isHighest
+                                      ? "bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800"
+                                      : "bg-muted/30 border-border/30 hover:bg-muted/50"
+                                      }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div
+                                        className="cursor-pointer"
+                                        onClick={() => navigate(profileLink)}
+                                      >
+                                        <Avatar className="w-10 h-10 border-2 border-background">
+                                          {profile?.avatar_url ? (
+                                            <AvatarImage src={profile.avatar_url} alt={displayName} />
+                                          ) : null}
+                                          <AvatarFallback className={bid.isHighest ? "bg-green-500 text-white" : ""}>
+                                            {displayName.slice(0, 2).toUpperCase()}
+                                          </AvatarFallback>
+                                        </Avatar>
+                                      </div>
+                                      <div>
+                                        <span
+                                          className="text-sm font-medium hover:underline cursor-pointer"
+                                          onClick={() => navigate(profileLink)}
+                                        >
+                                          {displayName}
+                                        </span>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                          {bid.isHighest ? (
+                                            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                              ★ Highest Bidder
+                                            </span>
+                                          ) : (
+                                            <span className="text-xs text-orange-500 dark:text-orange-400">
+                                              Outbid
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className={`font-bold text-lg ${bid.isHighest ? "text-green-700 dark:text-green-400" : ""}`}>
+                                        {parseFloat(bid.amount).toFixed(4)}
+                                        <span className="text-sm text-muted-foreground ml-1">ETH</span>
+                                      </p>
+                                      <a
+                                        href={`${BLOCK_EXPLORER}/tx/${bid.transactionHash}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                                      >
+                                        View tx ↗
+                                      </a>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
                         )}
                       </CardContent>
                     </Card>
-                    {artwork.activity && artwork.activity.filter(a => !['offer', 'offer_accepted', 'offer_declined', 'offer_cancelled'].includes(a.activity_type)).length > ITEMS_PER_PAGE && (
-                      <Pagination className="mt-4">
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              onClick={() => setActivityPage(p => Math.max(1, p - 1))}
-                              className={activityPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                            />
-                          </PaginationItem>
-                          {Array.from({ length: Math.ceil(artwork.activity.filter(a => !['offer', 'offer_accepted', 'offer_declined', 'offer_cancelled'].includes(a.activity_type)).length / ITEMS_PER_PAGE) }, (_, i) => i + 1).map((page) => (
-                            <PaginationItem key={page}>
-                              <PaginationLink
-                                onClick={() => setActivityPage(page)}
-                                isActive={activityPage === page}
-                                className="cursor-pointer"
-                              >
-                                {page}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          <PaginationItem>
-                            <PaginationNext 
-                              onClick={() => setActivityPage(p => Math.min(Math.ceil(artwork.activity.filter(a => !['offer', 'offer_accepted', 'offer_declined', 'offer_cancelled'].includes(a.activity_type)).length / ITEMS_PER_PAGE), p + 1))}
-                              className={activityPage === Math.ceil(artwork.activity.filter(a => !['offer', 'offer_accepted', 'offer_declined', 'offer_cancelled'].includes(a.activity_type)).length / ITEMS_PER_PAGE) ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    )}
-                  </>
-                </TabsContent>
-                <TabsContent value="price" className="mt-4">
-                  <Card className="border-border bg-card">
-                    <CardContent className="p-6">
-                      {artwork.activity && artwork.activity.length > 0 ? (
-                        <div className="space-y-3">
-                          {artwork.activity
-                            .filter(a => ['listed', 'sold', 'sale'].includes(a.activity_type) && !['offer', 'offer_accepted', 'offer_declined', 'offer_cancelled'].includes(a.activity_type))
-                            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                            .map((activity) => (
-                              <div key={activity.id} className="flex justify-between items-center border-b border-border pb-3 last:border-0">
-                                <div>
-                                  <p className="font-medium">
-                                    {activity.activity_type === 'listed' && (
-                                      <>
-                                        Listed by{' '}
-                                        <Link to={`/profile/${artwork.artist.username}`} className="hover:text-primary hover:underline">
-                                          {artwork.artist.display_name || artwork.artist.username}
-                                        </Link>
-                                      </>
-                                    )}
-                                    {(activity.activity_type === 'sold' || activity.activity_type === 'sale') && (
-                                      <>
-                                        <span className="text-green-500">Sold</span> to{' '}
-                                        <Link to={`/profile/${activity.to_user?.username}`} className="hover:text-primary hover:underline">
-                                          {activity.to_user?.username || 'Unknown'}
-                                        </Link>
-                                        {' '}from{' '}
-                                        <Link to={`/profile/${activity.from_user?.username}`} className="hover:text-primary hover:underline">
-                                          {activity.from_user?.username || 'Unknown'}
-                                        </Link>
-                                      </>
-                                    )}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {new Date(activity.created_at).toLocaleString()}
-                                  </p>
-                                </div>
-                                {activity.price && (
-                                  <p className="font-semibold text-primary">${formatCurrency(activity.price)}</p>
-                                )}
-                              </div>
-                            ))}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground text-center py-8">
-                          No sales recorded yet
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-                <TabsContent value="bids" className="mt-4">
-                  <BidHistoryTab artworkId={String(artwork.id)} userId={user?.id?.toString()} />
-                </TabsContent>
+                  </TabsContent>
+                )}
               </Tabs>
             </div>
           </div>
         </div>
       </div>
-      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
-      
-      {/* Edit Price Dialog */}
-      <Dialog open={editPriceDialogOpen} onOpenChange={setEditPriceDialogOpen}>
+
+      {/* ────── Dialogs ────── */}
+
+      {/* Buy Confirmation */}
+      <Dialog open={showBuyDialog} onOpenChange={setShowBuyDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Price</DialogTitle>
+            <DialogTitle>Confirm Purchase</DialogTitle>
+            <DialogDescription>
+              You are about to purchase this NFT
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="price">New Price ($)</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                min="0"
-                value={newPrice}
-                onChange={(e) => setNewPrice(e.target.value)}
-                placeholder="Enter new price"
-              />
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">NFT:</span>
+              <span className="font-semibold">{nft.name}</span>
             </div>
-            {newPrice && parseFloat(newPrice) > 0 && (
-              <div className="p-3 bg-secondary/50 rounded-lg border border-border space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">List Price:</span>
-                  <span className="font-medium">${formatCurrency(parseFloat(newPrice))}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Platform Fee (2.5%):</span>
-                  <span className="font-medium text-destructive">-${formatCurrency(parseFloat(newPrice) * 0.025)}</span>
-                </div>
-                <div className="pt-2 border-t border-border flex items-center justify-between">
-                  <span className="text-sm font-semibold">You will receive:</span>
-                  <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                    ${formatCurrency(parseFloat(newPrice) * 0.975)}
-                  </span>
-                </div>
-              </div>
-            )}
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Token ID:</span>
+              <span className="font-mono">#{nft.tokenId}</span>
+            </div>
+            <div className="flex justify-between items-center border-t pt-4">
+              <span className="text-sm text-muted-foreground">Price:</span>
+              <span className="font-bold text-lg">
+                {formatPrice(nft.price)} ETH
+              </span>
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditPriceDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowBuyDialog(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSavePrice}>
-              Save Price
+            <Button
+              onClick={handleBuy}
+              disabled={isProcessing}
+              className="bg-gradient-primary hover:bg-gradient-hover"
+            >
+              {isProcessing ? "Processing..." : "Confirm Purchase"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Edit Details Dialog */}
-      <Dialog open={editDetailsDialogOpen} onOpenChange={setEditDetailsDialogOpen}>
+      {/* Bid Dialog */}
+      <Dialog open={showBidDialog} onOpenChange={setShowBidDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Artwork Details</DialogTitle>
+            <DialogTitle>Place Your Bid</DialogTitle>
+            <DialogDescription>
+              Enter your bid amount for this auction
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">NFT:</span>
+              <span className="font-semibold">{nft.name}</span>
+            </div>
+            {nft.auction && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    Current Bid:
+                  </span>
+                  <span className="font-semibold">
+                    {parseFloat(nft.auction.highestBid) > 0
+                      ? `${formatPrice(nft.auction.highestBid)} ETH`
+                      : `${formatPrice(nft.auction.startingPrice)} ETH (starting)`}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    Ends in:
+                  </span>
+                  <span className="font-semibold">
+                    {formatTimeRemaining(nft.auctionEndTime)}
+                  </span>
+                </div>
+              </>
+            )}
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="bidAmount">Your Bid (ETH)</Label>
               <Input
-                id="title"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Enter artwork title"
+                id="bidAmount"
+                type="number"
+                placeholder="Enter bid amount"
+                value={bidAmount}
+                onChange={(e) => setBidAmount(e.target.value)}
+                min={0.0001}
+                step="0.0001"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                placeholder="Enter artwork description"
-                rows={4}
-              />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Note: The image cannot be changed once created.
-            </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDetailsDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowBidDialog(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSaveDetails}>
-              Save Changes
+            <Button
+              onClick={handlePlaceBid}
+              disabled={isProcessing || !bidAmount}
+              className="bg-gradient-primary hover:bg-gradient-hover"
+            >
+              {isProcessing ? "Processing..." : "Place Bid"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* List for Sale Dialog */}
-      <Dialog open={listForSaleDialogOpen} onOpenChange={setListForSaleDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={showListDialog} onOpenChange={setShowListDialog}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>List Artwork</DialogTitle>
+            <DialogTitle>List for Sale</DialogTitle>
             <DialogDescription>
-              Choose how you want to list your artwork
+              Set a fixed price for your NFT
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-6 py-4">
-            {/* Listing Type Selection */}
-            <div className="space-y-3">
-              <Label>Listing Type</Label>
-              <RadioGroup value={listingType} onValueChange={(value: any) => setListingType(value)}>
-                <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors">
-                  <RadioGroupItem value="fixed" id="list-fixed" />
-                  <div className="flex-1">
-                    <Label htmlFor="list-fixed" className="cursor-pointer">
-                      <p className="font-semibold">List as Fixed Price</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        List your artwork at a set price. Buyers can purchase it immediately. The listing will expire if not purchased by the expiry date.
-                      </p>
-                    </Label>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors">
-                  <RadioGroupItem value="auction" id="list-auction" />
-                  <div className="flex-1">
-                    <Label htmlFor="list-auction" className="cursor-pointer">
-                      <p className="font-semibold">Timed Auction</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Let collectors bid on your artwork. Highest bidder wins when time expires.
-                      </p>
-                    </Label>
-                  </div>
-                </div>
-              </RadioGroup>
+          <div className="space-y-4 py-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">NFT:</span>
+              <span className="font-semibold">{nft.name}</span>
             </div>
-
-            {/* Pricing Fields */}
-            {listingType === "fixed" ? (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="sale-price">Price (USD) *</Label>
-                  <Input
-                    id="sale-price"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="0.00"
-                    value={salePrice}
-                    onChange={(e) => setSalePrice(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Set the price at which collectors can purchase your artwork
-                  </p>
+            <div className="space-y-2">
+              <Label htmlFor="listPrice">Price (ETH)</Label>
+              <Input
+                id="listPrice"
+                type="number"
+                placeholder="0.01"
+                value={listPrice}
+                onChange={(e) => setListPrice(e.target.value)}
+                min={0.0001}
+                step="0.0001"
+              />
+            </div>
+            {listPrice && parseFloat(listPrice) > 0 && (
+              <div className="p-3 bg-secondary/50 rounded-lg border border-border space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">List Price:</span>
+                  <span className="font-medium">{listPrice} ETH</span>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="fixed-expiry">Listing Expiry Duration *</Label>
-                  <Select value={fixedPriceExpiry} onValueChange={setFixedPriceExpiry}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="24">24 hours</SelectItem>
-                      <SelectItem value="48">2 days</SelectItem>
-                      <SelectItem value="72">3 days</SelectItem>
-                      <SelectItem value="168">7 days</SelectItem>
-                      <SelectItem value="336">14 days</SelectItem>
-                      <SelectItem value="720">30 days</SelectItem>
-                      <SelectItem value="never">Never expires</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {fixedPriceExpiry === "never" 
-                      ? "The listing will remain active until manually delisted or sold"
-                      : "The listing will be automatically delisted if not purchased by this time"}
-                  </p>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    Platform Fee (2.5%):
+                  </span>
+                  <span className="font-medium text-destructive">
+                    -{(parseFloat(listPrice) * 0.025).toFixed(6)} ETH
+                  </span>
                 </div>
-
-                {salePrice && parseFloat(salePrice) > 0 && parseFloat(salePrice) <= 1000000 && (
-                  <div className="p-4 bg-secondary/50 rounded-lg border border-border space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">List Price:</span>
-                      <span className="font-medium">${formatCurrency(parseFloat(salePrice))}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Platform Fee (2.5%):</span>
-                      <span className="font-medium text-destructive">-${formatCurrency(parseFloat(salePrice) * 0.025)}</span>
-                    </div>
-                    <div className="pt-2 border-t border-border flex items-center justify-between">
-                      <span className="text-sm font-semibold">You will receive:</span>
-                      <span className="text-lg font-bold text-primary">${formatCurrency(parseFloat(salePrice) * 0.975)}</span>
-                    </div>
-                  </div>
-                )}
-                {salePrice && parseFloat(salePrice) > 1000000 && (
-                  <div className="p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-                    <p className="text-sm text-destructive font-medium">
-                      Price cannot exceed $1,000,000
-                    </p>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="starting-bid">Starting Bid (USD) *</Label>
-                  <Input
-                    id="starting-bid"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="0.00"
-                    value={startingBid}
-                    onChange={(e) => setStartingBid(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Minimum bid to start the auction
-                  </p>
+                <div className="pt-2 border-t border-border flex justify-between">
+                  <span className="text-sm font-semibold">You receive:</span>
+                  <span className="font-bold text-primary">
+                    {(parseFloat(listPrice) * 0.975).toFixed(6)} ETH
+                  </span>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reserve-price">Reserve Price (USD) <span className="text-muted-foreground text-xs">(Optional)</span></Label>
-                  <Input
-                    id="reserve-price"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="0.00"
-                    value={reservePrice}
-                    onChange={(e) => setReservePrice(e.target.value)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Minimum price you're willing to accept. If bidding doesn't reach this price, the sale won't complete.
-                  </p>
-                  {reservePrice && startingBid && parseFloat(reservePrice) > 0 && parseFloat(startingBid) > 0 && (
-                    parseFloat(reservePrice) < parseFloat(startingBid) ? (
-                      <p className="text-xs text-destructive">
-                        Reserve price must be greater than or equal to starting bid
-                      </p>
-                    ) : null
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="duration">Auction Duration *</Label>
-                  <Select value={auctionDuration} onValueChange={setAuctionDuration}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="6">6 hours</SelectItem>
-                      <SelectItem value="12">12 hours</SelectItem>
-                      <SelectItem value="24">24 hours</SelectItem>
-                      <SelectItem value="48">2 days</SelectItem>
-                      <SelectItem value="72">3 days</SelectItem>
-                      <SelectItem value="168">7 days</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    How long the auction will run
-                  </p>
-                  {auctionDuration && (
-                    <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-                      <p className="text-sm font-semibold text-primary mb-1">Auction End Date & Time:</p>
-                      <p className="text-sm">
-                        {(() => {
-                          const endTime = new Date();
-                          endTime.setHours(endTime.getHours() + parseInt(auctionDuration));
-                          return endTime.toLocaleString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                          });
-                        })()}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </>
+              </div>
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setListForSaleDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowListDialog(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSaveListForSale} className="bg-gradient-primary hover:bg-gradient-hover">
-              List
+            <Button
+              onClick={handleListForSale}
+              disabled={isProcessing || !listPrice}
+              className="bg-gradient-primary hover:bg-gradient-hover"
+            >
+              {isProcessing ? "Processing..." : "List for Sale"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-
-      {/* Bid Dialog */}
-      <Dialog open={bidDialogOpen} onOpenChange={setBidDialogOpen}>
-        <DialogContent className="max-w-xl">
+      {/* Create Auction Dialog */}
+      <Dialog open={showAuctionDialog} onOpenChange={setShowAuctionDialog}>
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>{userActiveBid ? "Update Your Bid" : "Place Your Bid"}</DialogTitle>
-            <DialogDescription>
-              {userActiveBid 
-                ? `Update your current bid of $${formatCurrency(userActiveBid.amount)}. Enter a new amount below.`
-                : `Enter your bid amount for this auction. Minimum bid: $${artwork?.auction ? formatCurrency((artwork.auction.current_bid ?? artwork.auction.start_price ?? 0) + 1) : "0"}`
-              }
-            </DialogDescription>
+            <DialogTitle>Create Auction</DialogTitle>
+            <DialogDescription>Start an auction for your NFT</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="p-4 bg-secondary/50 rounded-lg border border-border space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Current Bid:</span>
-                <span className="text-xl font-bold">${artwork?.auction ? (artwork.auction.current_bid ?? artwork.auction.start_price) : 0}</span>
-              </div>
-              {userActiveBid && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Your Bid:</span>
-                  <span className="text-xl font-bold text-primary">${userActiveBid.amount}</span>
-                </div>
-              )}
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Your Balance:</span>
-                <span className="text-lg font-semibold text-primary">${formatCurrency(userBalance)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Auction Ends:</span>
-                <span className="text-sm font-medium">{endTimeStr}</span>
-              </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">NFT:</span>
+              <span className="font-semibold">{nft.name}</span>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="bid-amount">
-                {userActiveBid ? "Add to Your Bid (USD) *" : "Your Bid Amount (USD) *"}
-              </Label>
+              <Label htmlFor="auctionStartPrice">Starting Price (ETH)</Label>
               <Input
-                id="bid-amount"
+                id="auctionStartPrice"
                 type="number"
-                step="0.01"
-                min="0.01"
-                placeholder={userActiveBid ? "Enter additional amount" : (artwork?.auction ? ((artwork.auction.current_bid ?? artwork.auction.start_price ?? 0) + 1).toString() : "0")}
-                value={bidAmount}
-                onChange={(e) => setBidAmount(e.target.value)}
-                autoFocus
+                placeholder="0.01"
+                value={auctionStartPrice}
+                onChange={(e) => setAuctionStartPrice(e.target.value)}
+                min={0.0001}
+                step="0.0001"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="auctionDuration">Duration (hours)</Label>
+              <Input
+                id="auctionDuration"
+                type="number"
+                placeholder="24"
+                value={auctionDuration}
+                onChange={(e) => setAuctionDuration(e.target.value)}
+                min={1}
+                step="1"
               />
               <p className="text-xs text-muted-foreground">
-                {userActiveBid 
-                  ? `Enter amount to add to your existing bid of $${formatCurrency(userActiveBid.amount)}`
-                  : "Minimum bid increment is $1"
-                }
-              </p>
-              {userActiveBid && bidAmount && parseFloat(bidAmount) > 0 && (
-                <p className="text-sm font-semibold text-primary">
-                  New total bid: ${formatCurrency(userActiveBid.amount + parseFloat(bidAmount))}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="bid-expiry">Bid Expiry</Label>
-              <Select 
-                value={bidExpiry || (availableExpiryOptions.length > 0 ? availableExpiryOptions[0].value : "24")} 
-                onValueChange={(value) => {
-                  console.log("Bid expiry changed to:", value);
-                  setBidExpiry(value);
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select expiry duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableExpiryOptions.length > 0 ? (
-                    availableExpiryOptions.map(option => {
-                      const isSelected = bidExpiry === option.value;
-                      return (
-                        <SelectItem 
-                          key={option.value} 
-                          value={option.value}
-                          className={isSelected ? "bg-accent" : ""}
-                        >
-                          {option.label}
-                        </SelectItem>
-                      );
-                    })
-                  ) : (
-                    <SelectItem value="1" disabled>Auction ending soon - no expiry options available</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Your bid will automatically expire after this time if not accepted (max: auction end time)
-                {userActiveBid?.expires_at && (
-                  <span className="block mt-1 text-primary font-medium">
-                    Current expiry: {new Date(userActiveBid.expires_at).toLocaleString()}
-                  </span>
-                )}
+                Min 1 hour, max 168 hours (1 week)
               </p>
             </div>
-
-            <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-              <p className="text-sm font-semibold mb-2">How Auctions Work:</p>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Bids are placed in real-time and are visible to all participants</li>
-                <li>• The highest bid when the auction ends wins the artwork</li>
-                <li>• Payment is processed automatically when the auction ends</li>
-                <li>• You need sufficient balance to place a bid</li>
-                <li>• You can outbid yourself to increase your maximum bid</li>
-              </ul>
-              <Button 
-                variant="link" 
-                className="text-xs p-0 h-auto mt-2"
-                onClick={() => {
-                  setBidDialogOpen(false);
-                  setAuctionExplainerOpen(true);
-                }}
-              >
-                Learn more about auctions →
-              </Button>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBidDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handlePlaceBid}
-              className="bg-gradient-primary hover:bg-gradient-hover"
-              disabled={!bidAmount || parseFloat(bidAmount) <= 0}
-            >
-              {userActiveBid 
-                ? `Add $${bidAmount || '0'} to Bid` 
-                : `Place Bid - $${bidAmount || '0'}`
-              }
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Auction Explainer Dialog */}
-      <Dialog open={auctionExplainerOpen} onOpenChange={setAuctionExplainerOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>How Auctions Work on ArtMart</DialogTitle>
-            <DialogDescription>
-              Everything you need to know about participating in auctions
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto">
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg">Placing a Bid</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">1.</span>
-                  <span>Each bid must be at least $1 higher than the current bid</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">2.</span>
-                  <span>You can place multiple bids to increase your maximum bid</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">3.</span>
-                  <span>All bids are final and cannot be retracted</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg">Auction Timeline</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>Auctions have a set end time displayed on the artwork page</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>When time expires, the highest bidder wins automatically</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>If there are no bids when the auction ends, the artwork becomes unlisted</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg">Payment & Ownership</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>When you win, payment is automatically deducted from your balance</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>The artwork is immediately transferred to your account</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>Sellers receive payment directly to their balance</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>Make sure you have sufficient balance before bidding</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg">Bid History & Transparency</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>All bids are publicly visible in the activity tab</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>You can see who placed each bid and when</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-bold text-primary">•</span>
-                  <span>Watch an auction to get notifications when you're outbid</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-              <p className="text-sm font-semibold mb-2">💡 Pro Tips:</p>
-              <ul className="text-xs text-muted-foreground space-y-1">
-                <li>• Add artworks to your watchlist to track auctions you're interested in</li>
-                <li>• Check the auction end time in your local timezone</li>
-                <li>• Review bid history to understand the artwork's demand</li>
-                <li>• Ensure you have funds in your balance before the auction ends</li>
-              </ul>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button 
-              onClick={() => setAuctionExplainerOpen(false)}
-              className="w-full bg-gradient-primary hover:bg-gradient-hover"
-            >
-              Got it!
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Purchase Confirmation Dialog */}
-      <Dialog open={purchaseConfirmOpen} onOpenChange={setPurchaseConfirmOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Purchase</DialogTitle>
-            <DialogDescription>
-              Review your purchase details below
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-              <span className="text-muted-foreground">Price</span>
-              <span className="font-bold text-lg">${artwork?.price ? formatCurrency(artwork.price) : '0.00'}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-              <span className="text-muted-foreground">Current Balance</span>
-              <span className="font-semibold">${formatCurrency(userBalance)}</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-muted rounded-lg border-2 border-primary">
-              <span className="text-muted-foreground">Balance After Purchase</span>
-              <span className={`font-bold ${(userBalance - (artwork?.price || 0)) < 0 ? 'text-destructive' : 'text-primary'}`}>
-                ${formatCurrency(userBalance - (artwork?.price || 0))}
-              </span>
-            </div>
-            {(userBalance - (artwork?.price || 0)) < 0 && (
-              <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                <p className="text-sm text-destructive font-medium mb-2">
-                  Insufficient balance to complete this purchase
+            {auctionDuration && parseInt(auctionDuration) > 0 && (
+              <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <p className="text-sm font-semibold text-primary mb-1">
+                  Auction End:
                 </p>
-                <Button
-                  onClick={() => {
-                    setPurchaseConfirmOpen(false);
-                    navigate("/balance");
-                  }}
-                  className="w-full bg-gradient-primary hover:bg-gradient-hover"
-                  size="sm"
-                >
-                  Add Funds to Balance
-                </Button>
+                <p className="text-sm">
+                  {(() => {
+                    const end = new Date();
+                    end.setHours(end.getHours() + parseInt(auctionDuration));
+                    return end.toLocaleString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    });
+                  })()}
+                </p>
               </div>
             )}
           </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setPurchaseConfirmOpen(false)}>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowAuctionDialog(false)}
+            >
               Cancel
             </Button>
-            <Button 
-              onClick={confirmPurchase}
-              disabled={(userBalance - (artwork?.price || 0)) < 0}
+            <Button
+              onClick={handleCreateAuction}
+              disabled={
+                isProcessing || !auctionStartPrice || !auctionDuration
+              }
+              className="bg-gradient-primary hover:bg-gradient-hover"
             >
-              Confirm Purchase
+              {isProcessing ? "Processing..." : "Create Auction"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delist Confirmation Dialog */}
-      <Dialog open={delistConfirmOpen} onOpenChange={setDelistConfirmOpen}>
-        <DialogContent className="sm:max-w-md">
+      {/* Update Price Dialog */}
+      <Dialog
+        open={showUpdatePriceDialog}
+        onOpenChange={setShowUpdatePriceDialog}
+      >
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {auctionIsActive ? "Cancel Auction" : "Delist Artwork"}
-            </DialogTitle>
+            <DialogTitle>Update Price</DialogTitle>
             <DialogDescription>
-              {auctionIsActive 
-                ? "Are you sure you want to cancel this auction? All active bids will be refunded."
-                : "Are you sure you want to remove this artwork from sale?"
-              }
+              Change the listing price for your NFT
             </DialogDescription>
           </DialogHeader>
-          {auctionIsActive && (
-            <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
-              <p className="text-sm text-destructive font-semibold mb-2">
-                ⚠️ Warning
-              </p>
-              <p className="text-xs text-muted-foreground">
-                This will immediately cancel the auction and refund all bidders. This action cannot be undone.
-              </p>
+          <div className="space-y-4 py-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                Current Price:
+              </span>
+              <span className="font-semibold">
+                {formatPrice(nft.price)} ETH
+              </span>
             </div>
-          )}
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDelistConfirmOpen(false)}>
+            <div className="space-y-2">
+              <Label htmlFor="newPrice">New Price (ETH)</Label>
+              <Input
+                id="newPrice"
+                type="number"
+                placeholder="0.01"
+                value={newPrice}
+                onChange={(e) => setNewPrice(e.target.value)}
+                min={0.0001}
+                step="0.0001"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowUpdatePriceDialog(false)}
+            >
               Cancel
             </Button>
-            <Button 
-              variant="destructive"
-              onClick={confirmDelist}
+            <Button
+              onClick={handleUpdatePrice}
+              disabled={isProcessing || !newPrice}
+              className="bg-gradient-primary hover:bg-gradient-hover"
             >
-              {auctionIsActive ? "Cancel Auction" : "Delist"}
+              {isProcessing ? "Processing..." : "Update Price"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Listing Confirmation */}
+      <Dialog
+        open={showCancelListingDialog}
+        onOpenChange={setShowCancelListingDialog}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancel Listing</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove this NFT from sale?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowCancelListingDialog(false)}
+            >
+              Keep Listed
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelListing}
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Processing..." : "Cancel Listing"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Auction Confirmation */}
+      <Dialog
+        open={showCancelAuctionDialog}
+        onOpenChange={setShowCancelAuctionDialog}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Cancel Auction</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this auction? Any existing bids
+              will be refunded.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+            <p className="text-sm text-destructive font-semibold mb-1">
+              Warning
+            </p>
+            <p className="text-xs text-muted-foreground">
+              This will immediately cancel the auction and refund all bidders.
+              This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowCancelAuctionDialog(false)}
+            >
+              Keep Auction
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelAuction}
+              disabled={isProcessing}
+            >
+              {isProcessing ? "Processing..." : "Cancel Auction"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Likers Dialog */}
+      <Dialog open={likersDialogOpen} onOpenChange={setLikersDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+              Liked by {likers.length} {likers.length === 1 ? "person" : "people"}
+            </DialogTitle>
+            <DialogDescription>
+              Users who liked this NFT
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[300px]">
+            {likers.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No likes yet</p>
+            ) : (
+              <div className="space-y-3">
+                {likers.map((liker) => (
+                  <div
+                    key={liker.wallet}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                    onClick={() => {
+                      setLikersDialogOpen(false);
+                      navigate(`/profile/${liker.wallet}`);
+                    }}
+                  >
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={liker.avatar_url || undefined} />
+                      <AvatarFallback className="bg-gradient-primary text-white text-xs">
+                        {(liker.display_name || liker.wallet.slice(2, 4)).slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {liker.display_name || `${liker.wallet.slice(0, 6)}...${liker.wallet.slice(-4)}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {`${liker.wallet.slice(0, 6)}...${liker.wallet.slice(-4)}`}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </>
@@ -1931,4 +1747,3 @@ const ArtDetail = () => {
 };
 
 export default ArtDetail;
-

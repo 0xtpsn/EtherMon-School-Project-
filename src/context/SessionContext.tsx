@@ -36,7 +36,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     setUser(loggedIn);
     return loggedIn;
   };
-  
+
   const loginWithGoogle = async (idToken: string) => {
     const loggedIn = await authApi.googleLogin({ id_token: idToken });
     setUser(loggedIn);
@@ -55,11 +55,18 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+/** Safe fallback when no SessionProvider is mounted (wallet-only mode). */
+const FALLBACK: SessionContextValue = {
+  user: null,
+  loading: false,
+  refresh: async () => { },
+  login: async () => { throw new Error("Session auth disabled – use wallet connection"); },
+  loginWithGoogle: async () => { throw new Error("Session auth disabled – use wallet connection"); },
+  logout: async () => { },
+};
+
 export const useSession = () => {
   const ctx = useContext(SessionContext);
-  if (!ctx) {
-    throw new Error("useSession must be used within SessionProvider");
-  }
-  return ctx;
+  return ctx ?? FALLBACK;
 };
 

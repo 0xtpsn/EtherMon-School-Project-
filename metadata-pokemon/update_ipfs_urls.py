@@ -9,8 +9,7 @@ from pathlib import Path
 
 # Configuration
 METADATA_DIR = Path(__file__).parent / "metadata"
-IPFS_FOLDER_CID = "QmZUjHFwxKNkq61mzzc2XGPHHvL9L1cHSZb3tWtVYPkA2v"
-IPFS_BASE_URL = f"ipfs://{IPFS_FOLDER_CID}"
+IPFS_BASE_URL = "https://gateway.lighthouse.storage/ipfs/bafybeicmqb7xgljekevci7xnqbotx3kopx5i5fda3z2c5774awvjhuwaiu"
 
 def update_metadata(file_path):
     """Update the image URL in a metadata file"""

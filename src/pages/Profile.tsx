@@ -1,30 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ethers } from "ethers";
 import Navbar from "@/components/layout/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Share2, Twitter, Globe, Instagram, Mail, Eye, GripVertical } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Share2, Twitter, Globe, Instagram, Mail, Pencil, Camera, Upload, ImageIcon } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import ArtCard from "@/components/art/ArtCard";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  rectSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { useSession } from "@/context/SessionContext";
+import { useWallet } from "@/context/WalletContext";
+import { meApi, ProfileDetailResponse } from "@/api/me";
+import { auctionsApi } from "@/api/auctions";
+import { Role } from "@/api/types";
+import { getRoleBioPlaceholder } from "@/lib/bioPlaceholders";
+import { useOwnedNFTs } from "@/hooks/useOwnedNFTs";
+import { useAllNFTs, NFTItem } from "@/hooks/useAllNFTs";
+import { useWalletActivity } from "@/hooks/useWalletActivity";
+import { useOnChainBids } from "@/hooks/useOnChainBids";
+import { nftLikesApi } from "@/api/notifications";
+import { POKECHAIN_MARKETPLACE_ADDRESS, RPC_URL } from "@/config/contracts";
+import PokechainMarketplaceAbi from "@/config/abi/PokechainMarketplace.json";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,254 +38,345 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { useSession } from "@/context/SessionContext";
-import { meApi, ProfileDetailResponse } from "@/api/me";
-import { auctionsApi } from "@/api/auctions";
-import { artworksApi } from "@/api/artworks";
-import { Role } from "@/api/types";
-import { getRoleBioPlaceholder } from "@/lib/bioPlaceholders";
-import { ArtworkSummary } from "@/api/types";
 
-// Sortable Watchlist Item Component
-interface SortableWatchlistItemProps {
-  artwork: ArtworkSummary;
-  onRemove: (artworkId: number) => Promise<void>;
-  formatEndTime: (endTime: string) => string;
+interface ProfileBid {
+  id: number;
+  auction_id: number;
+  artwork_id?: number;
+  title?: string;
+  status?: string;
+  amount: number;
+  created_at: string;
+  expires_at?: string | null;
+  artworks?: {
+    title?: string;
+    image_url?: string;
+    artist?: {
+      username?: string;
+      display_name?: string;
+    };
+  };
 }
 
-const SortableWatchlistItem = ({ artwork, onRemove, formatEndTime }: SortableWatchlistItemProps) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: artwork.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+interface ProfileActivity {
+  id?: number | string;
+  activity_type?: string;
+  artwork_id?: number;
+  created_at?: string;
+  price?: number | string;
+  artworks?: {
+    title?: string;
+    image_url?: string;
   };
+}
 
-  const isAuction = artwork.auction && artwork.auction.status === 'open';
-  const activeAuction = artwork.auction;
-  const highestBid = artwork.bids?.reduce((max, b) => Math.max(max, b.amount), 0) || 0;
-  const displayPrice = isAuction
-    ? (highestBid > 0 ? highestBid : (activeAuction?.current_bid || activeAuction?.start_price || artwork.price || 0))
-    : (artwork.price || 0);
-
-  return (
-    <div ref={setNodeRef} style={style} className="relative group">
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute top-2 left-2 z-20 cursor-grab active:cursor-grabbing bg-background/90 backdrop-blur-sm rounded p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-        title="Drag to reorder"
-      >
-        <GripVertical className="w-4 h-4 text-muted-foreground" />
-      </div>
-      <ArtCard
-        id={artwork.id.toString()}
-        title={artwork.title}
-        artist={artwork.artist?.display_name || artwork.artist?.username || "Unknown"}
-        price={displayPrice.toString()}
-        image={artwork.image_url}
-        isAuction={!!isAuction}
-        isListed={!!artwork.is_listed}
-        endTime={activeAuction ? formatEndTime(activeAuction.end_time) : undefined}
-        ownerId={artwork.artist.id.toString()}
-      />
-      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Button
-          variant="outline"
-          size="icon"
-          className="bg-background/90 backdrop-blur-sm"
-          onClick={async () => {
-            await onRemove(artwork.id);
-          }}
-          title="Remove from watchlist"
-        >
-          <Eye className="w-4 h-4 text-primary" />
-        </Button>
-      </div>
-    </div>
-  );
-};
+interface CurrentAuctionBid {
+  tokenId: number;
+  nftName: string;
+  nftImage: string;
+  bidAmount: string;
+  highestBid: string;
+  auctionEndTime: number;
+  isHighestBidder: boolean;
+}
 
 const Profile = () => {
   const { username } = useParams<{ username?: string }>();
   const identifier = username; // Support both :username and :identifier routes
   const navigate = useNavigate();
   const { user } = useSession();
+  const { address: walletAddress } = useWallet();
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState<ProfileDetailResponse | null>(null);
+  const [activityPage, setActivityPage] = useState(1);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [selectedBid, setSelectedBid] = useState<any>(null);
+  const [selectedBid, setSelectedBid] = useState<ProfileBid | null>(null);
   const [newBidAmount, setNewBidAmount] = useState("");
-  const [activityPage, setActivityPage] = useState(1);
-  const [ownedFilter, setOwnedFilter] = useState<"all" | "listed" | "unlisted" | "auction">("all");
-  const [orderedWatchlist, setOrderedWatchlist] = useState<any[]>([]);
+  const [myBids, setMyBids] = useState<ProfileBid[]>([]);
+  const [myBidsLoading, setMyBidsLoading] = useState(false);
+  const [bidsFetched, setBidsFetched] = useState(false);
+  const [currentAuctionBids, setCurrentAuctionBids] = useState<CurrentAuctionBid[]>([]);
+  const [currentAuctionBidsLoading, setCurrentAuctionBidsLoading] = useState(false);
+
+
+  // ── Edit Profile Dialog State ──
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDisplayName, setEditDisplayName] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [editAvatarUrl, setEditAvatarUrl] = useState("");
+  const [editBannerUrl, setEditBannerUrl] = useState("");
+  const [editTwitter, setEditTwitter] = useState("");
+  const [editInstagram, setEditInstagram] = useState("");
+  const [editWebsite, setEditWebsite] = useState("");
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
+
+  // Convert file to base64 data URL
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Avatar must be under 2MB", variant: "destructive" });
+      return;
+    }
+    const base64 = await fileToBase64(file);
+    setEditAvatarUrl(base64);
+  };
+
+  const handleBannerFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 4 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Banner must be under 4MB", variant: "destructive" });
+      return;
+    }
+    const base64 = await fileToBase64(file);
+    setEditBannerUrl(base64);
+  };
+
+  // localStorage profile data for wallet-only users
+  const [localProfileData, setLocalProfileData] = useState<{
+    display_name?: string;
+    bio?: string;
+    avatar_url?: string;
+    banner_url?: string;
+    twitter_handle?: string;
+    instagram_handle?: string;
+    website_url?: string;
+  } | null>(null);
+
 
   const ITEMS_PER_PAGE = 10;
 
   const profile = profileData?.profile;
-  const ownedArtworks = profileData?.owned_artworks || [];
-  const likedArtworks = profileData?.liked_artworks || [];
-  const watchlistArtworks = profileData?.watchlist_artworks || [];
-  const createdCount = profileData?.created_count || 0;
-  const activity = profileData?.activity || [];
-  const bids = profileData?.bids || [];
-  const bidsData = bids;
-  const activityData = activity;
   const profileRole = profile?.role as Role | undefined;
   const displayedBio = profile?.bio?.trim() || getRoleBioPlaceholder(profileRole);
+  const profileBids = ((profileData?.bids ?? []) as ProfileBid[]).filter((b) => Boolean(b && b.id));
+  const backendActivities = (profileData?.activity ?? []) as ProfileActivity[];
 
   const isOwnProfile = useMemo(() => {
-    return user && (user.id === profile?.id || user.username === identifier);
-  }, [user, profile, identifier]);
+    if (user && (user.id === profile?.id || user.username === identifier)) return true;
+    if (walletAddress && profile?.wallet_address && walletAddress.toLowerCase() === profile.wallet_address.toLowerCase()) return true;
+    if (walletAddress && identifier && identifier.startsWith("0x") && walletAddress.toLowerCase() === identifier.toLowerCase()) return true;
+    return false;
+  }, [user, profile, identifier, walletAddress]);
 
-  // Initialize and sync ordered watchlist
+  // Determine wallet to use for on-chain lookups.
+  // For wallet-only profiles where backend wallet_address may be missing,
+  // fall back to currently connected wallet only on own profile.
+  const profileWalletAddress = useMemo(() => {
+    const explicit = profile?.wallet_address || (identifier?.startsWith("0x") ? identifier : null);
+    if (explicit) return explicit;
+    if (isOwnProfile && walletAddress) return walletAddress;
+    return null;
+  }, [profile?.wallet_address, identifier, isOwnProfile, walletAddress]);
+
+  // On-chain activity (lazy — only fetches when Activity tab is clicked)
+  const { activities: onChainActivity, loading: activityLoading, refetch: fetchActivity } = useWalletActivity(profileWalletAddress);
+  const [activityFetched, setActivityFetched] = useState(false);
+  const { bids: onChainBids, loading: onChainBidsLoading, refetch: fetchOnChainBids } = useOnChainBids(profileWalletAddress);
+
+  const { nfts: ownedNFTs, loading: nftsLoading, refetch: refetchNFTs } = useOwnedNFTs(profileWalletAddress);
+
+  // Get all NFTs for the liked filter
+  const { nfts: allNFTs, loading: allNFTsLoading } = useAllNFTs();
+
+  // ── localStorage profile for wallet-only users ──
+  const localStorageKey = profileWalletAddress
+    ? `ethermon_profile_${profileWalletAddress.toLowerCase()}`
+    : null;
+
+  // Load localStorage profile data
   useEffect(() => {
-    if (watchlistArtworks.length > 0) {
-      const storageKey = `watchlist_order_${user?.id || 'anonymous'}`;
-      const savedOrder = localStorage.getItem(storageKey);
-      
-      if (savedOrder) {
-        try {
-          const orderIds = JSON.parse(savedOrder) as number[];
-          // Create a map for quick lookup
-          const artworkMap = new Map(watchlistArtworks.map(a => [a.id, a]));
-          // Reorder based on saved order, then append any new items
-          const ordered = orderIds
-            .map(id => artworkMap.get(id))
-            .filter(Boolean) as ArtworkSummary[];
-          const newItems = watchlistArtworks.filter(a => !orderIds.includes(a.id));
-          setOrderedWatchlist([...ordered, ...newItems]);
-        } catch (error) {
-          // If parsing fails, use default order
-          setOrderedWatchlist(watchlistArtworks);
-        }
-      } else {
-        setOrderedWatchlist(watchlistArtworks);
+    if (!localStorageKey) return;
+    try {
+      const stored = localStorage.getItem(localStorageKey);
+      if (stored) {
+        setLocalProfileData(JSON.parse(stored));
       }
-    } else {
-      setOrderedWatchlist([]);
+    } catch {
+      // ignore parse errors
     }
-  }, [watchlistArtworks, user?.id]);
+  }, [localStorageKey]);
 
-  // Save order to localStorage when it changes
-  useEffect(() => {
-    if (orderedWatchlist.length > 0 && user?.id) {
-      const storageKey = `watchlist_order_${user.id}`;
-      const orderIds = orderedWatchlist.map(a => a.id);
-      localStorage.setItem(storageKey, JSON.stringify(orderIds));
-    }
-  }, [orderedWatchlist, user?.id]);
+  // Merge: localStorage overrides backend defaults for wallet-only users
+  const mergedDisplayName = localProfileData?.display_name || profile?.display_name || profile?.username || "Unnamed";
+  const mergedBio = localProfileData?.bio || profile?.bio?.trim() || getRoleBioPlaceholder(profileRole);
+  const mergedAvatarUrl = localProfileData?.avatar_url || profile?.avatar_url || "/placeholder.svg";
+  const mergedBannerUrl = localProfileData?.banner_url || profile?.banner_url || "";
+  const mergedTwitter = localProfileData?.twitter_handle || profile?.twitter_handle || "";
+  const mergedInstagram = localProfileData?.instagram_handle || profile?.instagram_handle || "";
+  const mergedWebsite = localProfileData?.website_url || profile?.website_url || "";
 
-  // Drag and drop sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  const openEditDialog = useCallback(() => {
+    setEditDisplayName(localProfileData?.display_name || profile?.display_name || "");
+    setEditBio(localProfileData?.bio || profile?.bio || "");
+    setEditAvatarUrl(localProfileData?.avatar_url || profile?.avatar_url || "");
+    setEditBannerUrl(localProfileData?.banner_url || profile?.banner_url || "");
+    setEditTwitter(mergedTwitter);
+    setEditInstagram(mergedInstagram);
+    setEditWebsite(mergedWebsite);
+    setEditDialogOpen(true);
+  }, [localProfileData, profile, mergedTwitter, mergedInstagram, mergedWebsite]);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      setOrderedWatchlist((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
-
-  const handleFavoriteChange = async (artworkId: string, favorited: boolean) => {
-    // If artwork was unliked, refresh the profile data to update the liked artworks list
-    if (!favorited && identifier) {
-      try {
-        const data = await meApi.profileDetail(identifier);
-        setProfileData(data);
-      } catch (error) {
-        // Silently fail - the list will update on next page refresh
-      }
-    }
-  };
-
-  const handleRemoveFromWatchlist = async (artworkId: number) => {
-    const artwork = orderedWatchlist.find(a => a.id === artworkId);
-    if (!artwork) return;
-
-    // Optimistic update
-    const previousWatchlist = [...orderedWatchlist];
-    const updatedWatchlist = orderedWatchlist.filter(a => a.id !== artworkId);
-    setOrderedWatchlist(updatedWatchlist);
-    
-    if (profileData) {
-      setProfileData({
-        ...profileData,
-        watchlist_artworks: updatedWatchlist,
-      });
-    }
+  const saveEditProfile = useCallback(async () => {
+    if (!profileWalletAddress) return;
+    const data: Record<string, string> = {};
+    if (editDisplayName.trim()) data.display_name = editDisplayName.trim();
+    if (editBio.trim()) data.bio = editBio.trim();
+    if (editAvatarUrl) data.avatar_url = editAvatarUrl;
+    if (editBannerUrl) data.banner_url = editBannerUrl;
+    if (editTwitter.trim()) data.twitter_handle = editTwitter.trim();
+    if (editInstagram.trim()) data.instagram_handle = editInstagram.trim();
+    if (editWebsite.trim()) data.website_url = editWebsite.trim();
 
     try {
-      await artworksApi.toggleWatch(artworkId, false);
-      toast({
-        title: "Removed from watchlist",
-        description: `${artwork.title} has been removed from your watchlist`
-      });
-    } catch (error: any) {
-      // Rollback on error
-      setOrderedWatchlist(previousWatchlist);
-      if (profileData) {
-        setProfileData({
-          ...profileData,
-          watchlist_artworks: previousWatchlist,
-        });
+      // Persist to backend so all users can see it
+      await meApi.updateWalletProfile(profileWalletAddress, data);
+
+      // Also cache locally for instant display
+      if (localStorageKey) {
+        localStorage.setItem(localStorageKey, JSON.stringify(data));
       }
-      toast({
-        title: "Error",
-        description: error.message || "Failed to remove from watchlist",
-        variant: "destructive",
+      setLocalProfileData(data);
+      setEditDialogOpen(false);
+      toast({ title: "Profile updated!" });
+
+      // Refresh profile data from backend
+      if (identifier) {
+        const freshData = await meApi.profileDetail(identifier);
+        setProfileData(freshData);
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to save profile", variant: "destructive" });
+    }
+  }, [profileWalletAddress, localStorageKey, editDisplayName, editBio, editAvatarUrl, editBannerUrl, editTwitter, editInstagram, editWebsite, toast, identifier]);
+
+  // Get liked NFTs from backend
+  const [likedNFTs, setLikedNFTs] = useState<NFTItem[]>([]);
+
+  useEffect(() => {
+    if (!profileWalletAddress || allNFTsLoading) return;
+
+    const fetchLiked = async () => {
+      try {
+        const { token_ids } = await nftLikesApi.likedByWallet(profileWalletAddress);
+        const liked = allNFTs.filter(nft => token_ids.includes(nft.tokenId));
+        setLikedNFTs(liked);
+      } catch {
+        // Fallback to localStorage if backend is offline
+        try {
+          const stored = localStorage.getItem(`ethermon_favorites_${profileWalletAddress.toLowerCase()}`);
+          if (stored) {
+            const likedIds: number[] = JSON.parse(stored);
+            const liked = allNFTs.filter(nft => likedIds.includes(nft.tokenId));
+            setLikedNFTs(liked);
+          } else {
+            setLikedNFTs([]);
+          }
+        } catch {
+          setLikedNFTs([]);
+        }
+      }
+    };
+    fetchLiked();
+  }, [profileWalletAddress, allNFTs, allNFTsLoading]);
+
+  const fetchMyBids = useCallback(async () => {
+    if (!isOwnProfile) {
+      setMyBids([]);
+      return;
+    }
+
+    setMyBidsLoading(true);
+    try {
+      const bids = await auctionsApi.myBids();
+      setMyBids(Array.isArray(bids) ? (bids as ProfileBid[]) : []);
+    } catch {
+      setMyBids([]);
+    } finally {
+      setMyBidsLoading(false);
+    }
+  }, [isOwnProfile]);
+
+  const combinedProfileBids = useMemo(() => {
+    const map = new Map<number, ProfileBid>();
+    for (const bid of profileBids) map.set(bid.id, bid);
+    for (const bid of myBids) map.set(bid.id, bid);
+    return Array.from(map.values()).sort((a, b) => {
+      const aTime = new Date(a.created_at).getTime();
+      const bTime = new Date(b.created_at).getTime();
+      return bTime - aTime;
+    });
+  }, [profileBids, myBids]);
+
+  const combinedOnChainBids = useMemo(() => {
+    const map = new Map<number, {
+      tokenId: number;
+      nftName: string;
+      nftImage: string;
+      bidAmount: string;
+      highestBid: string;
+      auctionEndTime: number;
+      isHighestBidder: boolean;
+    }>();
+
+    for (const bid of onChainBids) {
+      map.set(bid.tokenId, {
+        tokenId: bid.tokenId,
+        nftName: bid.nftName,
+        nftImage: bid.nftImage,
+        bidAmount: bid.bidAmount,
+        highestBid: bid.highestBid,
+        auctionEndTime: bid.auctionEndTime,
+        isHighestBidder: bid.isHighestBidder,
       });
     }
-  };
 
-  const filteredOwnedArtworks = useMemo(() => {
-    if (ownedFilter === "all") return ownedArtworks;
+    for (const bid of currentAuctionBids) {
+      map.set(bid.tokenId, bid);
+    }
 
-    return ownedArtworks.filter(artwork => {
-      const isAuction = artwork.auction && artwork.auction.status === 'open';
+    return Array.from(map.values());
+  }, [onChainBids, currentAuctionBids]);
 
-      if (ownedFilter === "auction") {
-        return isAuction;
-      } else if (ownedFilter === "listed") {
-        return artwork.is_listed && !isAuction; // Listed but not auction
-      } else if (ownedFilter === "unlisted") {
-        return !artwork.is_listed;
-      }
-      return true;
-    });
-  }, [ownedArtworks, ownedFilter]);
+  const fallbackActivities = useMemo(() => {
+    return backendActivities.map((act, idx) => ({
+      id: String(act.id ?? `backend-${idx}`),
+      type: act.activity_type || "activity",
+      tokenId: act.artwork_id || 0,
+      nftName: act.artworks?.title || "Artwork",
+      nftImage: act.artworks?.image_url || "",
+      price: act.price ? String(act.price) : "",
+      timestamp: act.created_at ? Math.floor(new Date(act.created_at).getTime() / 1000) : 0,
+    }));
+  }, [backendActivities]);
+
+  const displayedActivities = onChainActivity.length > 0 ? onChainActivity : fallbackActivities;
 
   useEffect(() => {
     let cancelled = false;
     const fetchProfile = async () => {
       if (!identifier) {
-        // If no username in URL, try to redirect to current user's profile or show error
+        // If no username in URL, redirect using session user or wallet address
         if (user?.username) {
           navigate(`/profile/${user.username}`, { replace: true });
+          return;
+        }
+        if (walletAddress) {
+          navigate(`/profile/${walletAddress}`, { replace: true });
           return;
         }
         setLoading(false);
@@ -325,10 +419,75 @@ const Profile = () => {
     };
   }, [identifier, user?.username, navigate]); // Added dependencies for redirect logic
 
+  useEffect(() => {
+    if (!bidsFetched) return;
+    fetchMyBids();
+    fetchOnChainBids();
+  }, [bidsFetched, fetchMyBids, fetchOnChainBids]);
+
+  useEffect(() => {
+    if (!bidsFetched || !profileWalletAddress || allNFTsLoading) return;
+
+    let cancelled = false;
+    const fetchCurrentAuctionBids = async () => {
+      setCurrentAuctionBidsLoading(true);
+      try {
+        const provider = new ethers.JsonRpcProvider(RPC_URL);
+        const marketplace = new ethers.Contract(
+          POKECHAIN_MARKETPLACE_ADDRESS,
+          PokechainMarketplaceAbi,
+          provider
+        );
+        const walletLower = profileWalletAddress.toLowerCase();
+        const auctionNfts = allNFTs.filter((nft) => nft.marketStatus === "auction");
+
+        const results = await Promise.all(
+          auctionNfts.map(async (nft) => {
+            try {
+              const auction = await marketplace.getAuction(nft.tokenId);
+              const highestBidder = String(auction.highestBidder || auction[3]).toLowerCase();
+              const active = Boolean(auction.active ?? auction[5]);
+              if (!active || highestBidder !== walletLower) return null;
+
+              return {
+                tokenId: nft.tokenId,
+                nftName: nft.name,
+                nftImage: nft.image || "",
+                bidAmount: ethers.formatEther(auction.highestBid ?? auction[2]),
+                highestBid: ethers.formatEther(auction.highestBid ?? auction[2]),
+                auctionEndTime: Number(auction.endTime ?? auction[4]),
+                isHighestBidder: true,
+              } as CurrentAuctionBid;
+            } catch {
+              return null;
+            }
+          })
+        );
+
+        if (!cancelled) {
+          setCurrentAuctionBids(results.filter(Boolean) as CurrentAuctionBid[]);
+        }
+      } catch {
+        if (!cancelled) {
+          setCurrentAuctionBids([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setCurrentAuctionBidsLoading(false);
+        }
+      }
+    };
+
+    fetchCurrentAuctionBids();
+    return () => {
+      cancelled = true;
+    };
+  }, [bidsFetched, profileWalletAddress, allNFTsLoading, allNFTs]);
+
   const handleUpdateBid = async () => {
     if (!selectedBid || !newBidAmount) return;
     try {
-      await auctionsApi.updateBid(selectedBid.auction_id, parseFloat(newBidAmount));
+      await auctionsApi.updateBid(selectedBid.id, parseFloat(newBidAmount));
       toast({ title: "Bid updated successfully" });
       setUpdateDialogOpen(false);
       setSelectedBid(null);
@@ -338,6 +497,8 @@ const Profile = () => {
         const data = await meApi.profileDetail(identifier);
         setProfileData(data);
       }
+      fetchMyBids();
+      fetchOnChainBids();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -350,7 +511,7 @@ const Profile = () => {
   const handleCancelBid = async () => {
     if (!selectedBid) return;
     try {
-      await auctionsApi.cancelBid(selectedBid.auction_id);
+      await auctionsApi.cancelBid(selectedBid.id);
       toast({ title: "Bid cancelled successfully" });
       setCancelDialogOpen(false);
       setSelectedBid(null);
@@ -359,6 +520,8 @@ const Profile = () => {
         const data = await meApi.profileDetail(identifier);
         setProfileData(data);
       }
+      fetchMyBids();
+      fetchOnChainBids();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -366,19 +529,6 @@ const Profile = () => {
         variant: "destructive",
       });
     }
-  };
-
-  const formatEndTime = (endTime: string) => {
-    const end = new Date(endTime);
-    const now = new Date();
-    const diff = end.getTime() - now.getTime();
-    if (diff <= 0) return "Ended";
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
   };
 
   if (loading) {
@@ -433,8 +583,8 @@ const Profile = () => {
       <main className="container mx-auto px-4 py-8">
         {/* Banner */}
         <div className="relative h-64 rounded-xl overflow-hidden mb-20 bg-gradient-primary">
-          {profile.banner_url ? (
-            <img src={profile.banner_url} alt="Banner" className="w-full h-full object-cover" />
+          {mergedBannerUrl ? (
+            <img src={mergedBannerUrl} alt="Banner" className="w-full h-full object-cover" />
           ) : (
             <div className="absolute inset-0 opacity-20">
               <div className="w-full h-full bg-[url('/placeholder.svg')] bg-cover bg-center" />
@@ -449,57 +599,53 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row items-start md:items-end gap-6">
             <div className="w-32 h-32 rounded-xl border-4 border-background overflow-hidden bg-gradient-card shadow-xl">
               <img
-                src={profile.avatar_url || "/placeholder.svg"}
+                src={mergedAvatarUrl}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold mb-2 drop-shadow-lg">
-                {profile.display_name || profile.username || "Unnamed"}
+                {mergedDisplayName}
               </h1>
               <p className="text-muted-foreground mb-4">
-                {displayedBio}
+                {mergedBio}
               </p>
               <div className="flex gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Owned: </span>
-                  <span className="font-semibold">{ownedArtworks.length}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Created: </span>
-                  <span className="font-semibold">{createdCount}</span>
+                  <span className="text-muted-foreground">NFTs: </span>
+                  <span className="font-semibold">{nftsLoading ? "…" : ownedNFTs.length}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Liked: </span>
-                  <span className="font-semibold">{likedArtworks.length}</span>
+                  <span className="font-semibold">{likedNFTs.length}</span>
                 </div>
               </div>
             </div>
             <div className="flex gap-2 flex-wrap">
-              {profile.twitter_handle ? (
+              {mergedTwitter ? (
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => window.open(`https://twitter.com/${profile.twitter_handle}`, "_blank")}
+                  onClick={() => window.open(`https://twitter.com/${mergedTwitter}`, "_blank")}
                 >
                   <Twitter className="w-4 h-4" />
                 </Button>
               ) : null}
-              {profile.instagram_handle ? (
+              {mergedInstagram ? (
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => window.open(`https://instagram.com/${profile.instagram_handle}`, "_blank")}
+                  onClick={() => window.open(`https://instagram.com/${mergedInstagram}`, "_blank")}
                 >
                   <Instagram className="w-4 h-4" />
                 </Button>
               ) : null}
-              {profile.website_url ? (
+              {mergedWebsite ? (
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => window.open(profile.website_url, "_blank")}
+                  onClick={() => window.open(mergedWebsite, "_blank")}
                 >
                   <Globe className="w-4 h-4" />
                 </Button>
@@ -541,9 +687,9 @@ const Profile = () => {
                 <Button
                   variant="outline"
                   className="gap-2"
-                  onClick={() => navigate("/settings")}
+                  onClick={openEditDialog}
                 >
-                  <Settings className="w-4 h-4" />
+                  <Pencil className="w-4 h-4" />
                   Edit Profile
                 </Button>
               )}
@@ -552,89 +698,45 @@ const Profile = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="owned" className="w-full">
+        <Tabs defaultValue="owned" className="w-full" onValueChange={(val) => {
+          if (val === "activity" && !activityFetched && profileWalletAddress) {
+            setActivityFetched(true);
+            fetchActivity();
+          }
+          if (val === "bids" && !bidsFetched) {
+            setBidsFetched(true);
+          }
+        }}>
           <TabsList className="mb-6">
             <TabsTrigger value="owned">Owned</TabsTrigger>
             <TabsTrigger value="liked">Liked</TabsTrigger>
-            {isOwnProfile && <TabsTrigger value="watchlist">Watchlist</TabsTrigger>}
             {isOwnProfile && <TabsTrigger value="bids">Bids</TabsTrigger>}
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
 
           <TabsContent value="owned">
-            {/* Filter Buttons */}
-            {ownedArtworks.length > 0 && (
-              <div className="flex gap-2 mb-6 flex-wrap">
-                <Button
-                  variant={ownedFilter === "all" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setOwnedFilter("all")}
-                >
-                  All ({ownedArtworks.length})
-                </Button>
-                <Button
-                  variant={ownedFilter === "listed" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setOwnedFilter("listed")}
-                >
-                  On Sale ({ownedArtworks.filter(a => a.is_listed && !(a.auction && a.auction.status === 'open')).length})
-                </Button>
-                <Button
-                  variant={ownedFilter === "auction" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setOwnedFilter("auction")}
-                >
-                  On Auction ({ownedArtworks.filter(a => a.auction && a.auction.status === 'open').length})
-                </Button>
-                <Button
-                  variant={ownedFilter === "unlisted" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setOwnedFilter("unlisted")}
-                >
-                  Not Listed ({ownedArtworks.filter(a => !a.is_listed).length})
-                </Button>
-              </div>
-            )}
-
-            {filteredOwnedArtworks.length > 0 ? (
+            {nftsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredOwnedArtworks.map((artwork) => {
-                  const isAuction = artwork.auction && artwork.auction.status === 'open';
-                  const activeAuction = artwork.auction;
-                  const highestBid = artwork.bids?.reduce((max, b) => Math.max(max, b.amount), 0) || 0;
-                  const displayPrice = isAuction
-                    ? (highestBid > 0 ? highestBid : (activeAuction?.current_bid || activeAuction?.start_price || artwork.price || 0))
-                    : (artwork.price || 0);
-
-                  return (
-                    <ArtCard
-                      key={artwork.id}
-                      id={artwork.id.toString()}
-                      title={artwork.title}
-                      artist={artwork.artist?.display_name || artwork.artist?.username || "Unknown"}
-                      price={displayPrice.toString()}
-                      image={artwork.image_url}
-                      isAuction={!!isAuction}
-                      isListed={!!artwork.is_listed}
-                      endTime={activeAuction ? formatEndTime(activeAuction.end_time) : undefined}
-                      ownerId={artwork.artist.id.toString()}
-                    />
-                  );
-                })}
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <Skeleton className="aspect-square w-full rounded-lg" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : ownedNFTs.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {ownedNFTs.map((nft) => (
+                  <ArtCard key={nft.tokenId} nft={nft} onRefetch={refetchNFTs} />
+                ))}
               </div>
             ) : (
               <Card className="bg-gradient-card border-border">
                 <CardContent className="p-12 text-center">
-                  <p className="text-muted-foreground">
-                    {ownedArtworks.length === 0
-                      ? "No items owned yet"
-                      : ownedFilter === "listed"
-                        ? "No listed items"
-                        : ownedFilter === "auction"
-                          ? "No items on auction"
-                          : ownedFilter === "unlisted"
-                            ? "No unlisted items"
-                            : "No items found"}
+                  <p className="text-muted-foreground">No NFTs owned yet</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Mint some Pokémon from the collection to get started!
                   </p>
                 </CardContent>
               </Card>
@@ -642,72 +744,18 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="liked">
-            {likedArtworks.length > 0 ? (
+            {likedNFTs.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {likedArtworks.map((artwork) => {
-                  const isAuction = artwork.auction && artwork.auction.status === 'open';
-                  const activeAuction = artwork.auction;
-                  const highestBid = artwork.bids?.reduce((max, b) => Math.max(max, b.amount), 0) || 0;
-                  const displayPrice = isAuction
-                    ? (highestBid > 0 ? highestBid : (activeAuction?.current_bid || activeAuction?.start_price || artwork.price || 0))
-                    : (artwork.price || 0);
-
-                  return (
-                    <ArtCard
-                      key={artwork.id}
-                      id={artwork.id.toString()}
-                      title={artwork.title}
-                      artist={artwork.artist?.display_name || artwork.artist?.username || "Unknown"}
-                      price={displayPrice.toString()}
-                      image={artwork.image_url}
-                      isAuction={!!isAuction}
-                      isListed={!!artwork.is_listed}
-                      endTime={activeAuction ? formatEndTime(activeAuction.end_time) : undefined}
-                      ownerId={artwork.artist.id.toString()}
-                      initialFavorited={true}
-                      onFavoriteChange={handleFavoriteChange}
-                    />
-                  );
-                })}
+                {likedNFTs.map((nft) => (
+                  <ArtCard key={nft.tokenId} nft={nft} onRefetch={refetchNFTs} />
+                ))}
               </div>
             ) : (
               <Card className="bg-gradient-card border-border">
                 <CardContent className="p-12 text-center">
                   <p className="text-muted-foreground">No liked items yet</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="watchlist">
-            {orderedWatchlist.length > 0 ? (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={orderedWatchlist.map(a => a.id)}
-                  strategy={rectSortingStrategy}
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {orderedWatchlist.map((artwork) => (
-                      <SortableWatchlistItem
-                        key={artwork.id}
-                        artwork={artwork}
-                        onRemove={handleRemoveFromWatchlist}
-                        formatEndTime={formatEndTime}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            ) : (
-              <Card className="bg-gradient-card border-border">
-                <CardContent className="p-12 text-center">
-                  <p className="text-muted-foreground">No items in watchlist yet</p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Add artworks to your watchlist to track auctions you're interested in
+                    Click the heart icon on any NFT to add it to your favorites
                   </p>
                 </CardContent>
               </Card>
@@ -715,25 +763,67 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="bids">
-            {bidsData.length > 0 ? (
+            {myBidsLoading || onChainBidsLoading || currentAuctionBidsLoading ? (
+              <Card className="bg-gradient-card border-border">
+                <CardContent className="p-12 text-center">
+                  <p className="text-muted-foreground">Loading bids...</p>
+                </CardContent>
+              </Card>
+            ) : (combinedProfileBids.length > 0 || combinedOnChainBids.length > 0) ? (
               <Card className="bg-gradient-card border-border">
                 <CardContent className="p-6">
                   <div className="space-y-4">
-                    {bidsData.map((bid) => (
+                    {combinedOnChainBids.map((bid) => (
+                      <div key={`onchain-${bid.tokenId}`} className="flex items-start gap-4 p-4 border border-border rounded-lg">
+                        {bid.nftImage && (
+                          <img
+                            src={bid.nftImage}
+                            alt={bid.nftName}
+                            className="w-16 h-16 rounded object-cover cursor-pointer"
+                            onClick={() => navigate(`/nft/${bid.tokenId}`)}
+                          />
+                        )}
+                        <div className="flex-1">
+                          <p className="font-medium">{bid.nftName}</p>
+                          <div className="flex gap-4 mt-2">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Your Bid</p>
+                              <p className="text-lg font-semibold text-primary">{bid.bidAmount} ETH</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Highest Bid</p>
+                              <p className="text-sm font-medium">{bid.highestBid} ETH</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Auction Ends</p>
+                              <p className="text-sm font-medium">{new Date(bid.auctionEndTime * 1000).toLocaleString()}</p>
+                            </div>
+                          </div>
+                          <div className="mt-2">
+                            <Badge variant={bid.isHighestBidder ? "default" : "secondary"}>
+                              {bid.isHighestBidder ? "Highest Bidder" : "Outbid"}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Button variant="outline" size="sm" onClick={() => navigate(`/nft/${bid.tokenId}`)}>
+                            View
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {combinedProfileBids.map((bid) => (
                       <div key={bid.id} className="flex items-start gap-4 p-4 border border-border rounded-lg">
                         {bid.artworks?.image_url && (
                           <img
                             src={bid.artworks.image_url}
-                            alt={bid.artworks.title}
+                            alt={bid.artworks.title || bid.title || "Artwork"}
                             className="w-16 h-16 rounded object-cover cursor-pointer"
-                            onClick={() => navigate(`/art/${bid.artwork_id}`)}
+                            onClick={() => bid.artwork_id && navigate(`/art/${bid.artwork_id}`)}
                           />
                         )}
                         <div className="flex-1">
-                          <p className="font-medium">{bid.artworks?.title}</p>
-                          <p className="text-sm text-muted-foreground">
-                            by {bid.artworks?.artist?.display_name || bid.artworks?.artist?.username}
-                          </p>
+                          <p className="font-medium">{bid.artworks?.title || bid.title || `Auction #${bid.auction_id}`}</p>
                           <div className="flex gap-4 mt-2">
                             <div>
                               <p className="text-xs text-muted-foreground">Your Bid</p>
@@ -754,7 +844,8 @@ const Profile = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => navigate(`/art/${bid.artwork_id}`)}
+                            onClick={() => bid.artwork_id && navigate(`/art/${bid.artwork_id}`)}
+                            disabled={!bid.artwork_id}
                           >
                             View
                           </Button>
@@ -795,73 +886,79 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="activity">
-            {activityData.length > 0 ? (
+            {activityLoading && fallbackActivities.length === 0 ? (
+              <Card className="bg-gradient-card border-border">
+                <CardContent className="p-12 text-center">
+                  <p className="text-muted-foreground">Loading on-chain activity...</p>
+                </CardContent>
+              </Card>
+            ) : displayedActivities.length > 0 ? (
               <>
                 <Card className="bg-gradient-card border-border">
                   <CardContent className="p-6">
-                    <div className="space-y-4">
-                      {activityData
+                    <div className="space-y-3">
+                      {displayedActivities
                         .slice((activityPage - 1) * ITEMS_PER_PAGE, activityPage * ITEMS_PER_PAGE)
-                        .map((activity) => {
+                        .map((act) => {
+                          const label: Record<string, string> = {
+                            mint: "🎉 Minted",
+                            transfer: "↗ Transferred",
+                            listed: "📋 Listed",
+                            listing_cancelled: "❌ Listing Cancelled",
+                            listing_updated: "✏️ Price Updated",
+                            sold: "💰 Sold",
+                            bought: "🛒 Bought",
+                            bid: "🔨 Bid Placed",
+                            auction_created: "🏷️ Auction Created",
+                            auction_won: "🏆 Auction Won",
+                            auction_cancelled: "❌ Auction Cancelled",
+                          };
+                          const timeAgo = act.timestamp
+                            ? (() => {
+                              const diff = Math.floor(Date.now() / 1000 - act.timestamp);
+                              if (diff < 60) return "just now";
+                              if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                              if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                              return `${Math.floor(diff / 86400)}d ago`;
+                            })()
+                            : "";
+
                           return (
-                            <div key={activity.id} className="flex items-start gap-4 p-4 border border-border rounded-lg">
-                              <div
-                                className="flex items-start gap-4 cursor-pointer"
-                                onClick={() => activity.artwork_id && navigate(`/art/${activity.artwork_id}`)}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
-                                    e.preventDefault();
-                                    activity.artwork_id && navigate(`/art/${activity.artwork_id}`);
-                                  }
-                                }}
-                              >
-                                {activity.artworks?.image_url && (
-                                  <img
-                                    src={activity.artworks.image_url}
-                                    alt={activity.artworks.title}
-                                    className="w-16 h-16 rounded object-cover"
-                                  />
-                                )}
-                                <div className="flex-1">
-                                  <p className="font-medium capitalize">
-                                    {(() => {
-                                      // If activity is "sold" or "sale", check if profile user is buyer or seller
-                                      if ((activity.activity_type === 'sold' || activity.activity_type === 'sale' || activity.activity_type === 'auction_won') && profile) {
-                                        // Use profile.id to check if the profile owner is the buyer or seller
-                                        const profileUserId = profile.id;
-                                        // If profile user is the buyer (to_user_id), show "bought"
-                                        if ((activity as any).to_user_id === profileUserId) {
-                                          return 'bought';
-                                        }
-                                        // If profile user is the seller (from_user_id), show "sold"
-                                        if ((activity as any).from_user_id === profileUserId) {
-                                          return 'sold';
-                                        }
-                                      }
-                                      // For other activity types, use the original type
-                                      return activity.activity_type;
-                                    })()}
-                                  </p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {activity.artworks?.title}
-                                  </p>
-                                  {activity.price && (
-                                    <p className="text-sm font-semibold text-primary">${activity.price}</p>
-                                  )}
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    {new Date(activity.created_at).toLocaleString()}
-                                  </p>
-                                </div>
+                            <div
+                              key={act.id}
+                              className="flex items-center gap-4 p-4 border border-border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                              onClick={() => navigate(`/nft/${act.tokenId}`)}
+                            >
+                              {act.nftImage && (
+                                <img
+                                  src={act.nftImage}
+                                  alt={act.nftName}
+                                  className="w-14 h-14 rounded-lg object-cover"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm">
+                                  {label[act.type] || act.type}
+                                </p>
+                                <p className="text-sm text-muted-foreground truncate">
+                                  {act.nftName}
+                                </p>
                               </div>
+                              {act.price && (
+                                <p className="text-sm font-semibold whitespace-nowrap">
+                                  {parseFloat(act.price).toFixed(4)} ETH
+                                </p>
+                              )}
+                              <p className="text-xs text-muted-foreground whitespace-nowrap">
+                                {timeAgo}
+                              </p>
                             </div>
                           );
                         })}
                     </div>
                   </CardContent>
                 </Card>
-                {activityData.length > ITEMS_PER_PAGE && (
+                {displayedActivities.length > ITEMS_PER_PAGE && (
                   <Pagination className="mt-4">
                     <PaginationContent>
                       <PaginationItem>
@@ -870,7 +967,7 @@ const Profile = () => {
                           className={activityPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
                       </PaginationItem>
-                      {Array.from({ length: Math.ceil(activityData.length / ITEMS_PER_PAGE) }, (_, i) => i + 1).map((page) => (
+                      {Array.from({ length: Math.ceil(displayedActivities.length / ITEMS_PER_PAGE) }, (_, i) => i + 1).map((page) => (
                         <PaginationItem key={page}>
                           <PaginationLink
                             onClick={() => setActivityPage(page)}
@@ -883,8 +980,8 @@ const Profile = () => {
                       ))}
                       <PaginationItem>
                         <PaginationNext
-                          onClick={() => setActivityPage(p => Math.min(Math.ceil(activityData.length / ITEMS_PER_PAGE), p + 1))}
-                          className={activityPage === Math.ceil(activityData.length / ITEMS_PER_PAGE) ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                          onClick={() => setActivityPage(p => Math.min(Math.ceil(displayedActivities.length / ITEMS_PER_PAGE), p + 1))}
+                          className={activityPage === Math.ceil(displayedActivities.length / ITEMS_PER_PAGE) ? "pointer-events-none opacity-50" : "cursor-pointer"}
                         />
                       </PaginationItem>
                     </PaginationContent>
@@ -957,6 +1054,192 @@ const Profile = () => {
               Cancel
             </Button>
             <Button onClick={handleUpdateBid}>Update Bid</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="bg-card border-border sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your profile information. Changes are saved locally to your browser.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-5 py-2 max-h-[60vh] overflow-y-auto">
+            {/* Profile Picture Upload */}
+            <div>
+              <Label className="mb-2 block">Profile Picture</Label>
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-xl overflow-hidden bg-gradient-card border-2 border-border relative group">
+                  <img
+                    src={editAvatarUrl || "/placeholder.svg"}
+                    alt="Avatar preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
+                  />
+                  <div
+                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    onClick={() => avatarInputRef.current?.click()}
+                  >
+                    <Camera className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarFileChange}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="gap-2"
+                    type="button"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    Upload Photo
+                  </Button>
+                  <p className="text-xs text-muted-foreground">JPG, PNG or GIF. Max 2MB.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Banner Upload */}
+            <div>
+              <Label className="mb-2 block">Banner Image</Label>
+              <div className="space-y-2">
+                <div className="w-full h-24 rounded-lg overflow-hidden bg-gradient-card border-2 border-border relative group">
+                  {editBannerUrl ? (
+                    <img
+                      src={editBannerUrl}
+                      alt="Banner preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = "/placeholder.svg"; }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div
+                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    onClick={() => bannerInputRef.current?.click()}
+                  >
+                    <Camera className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleBannerFileChange}
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bannerInputRef.current?.click()}
+                    className="gap-2"
+                    type="button"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    {editBannerUrl ? "Change Banner" : "Upload Banner"}
+                  </Button>
+                  {editBannerUrl && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditBannerUrl("")}
+                      className="text-muted-foreground text-xs"
+                      type="button"
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">Recommended: 1400×400px. Max 4MB.</p>
+              </div>
+            </div>
+
+            {/* Display Name */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-display-name">Display Name</Label>
+              <Input
+                id="edit-display-name"
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+                placeholder="Enter your display name"
+                className="bg-secondary border-border"
+              />
+            </div>
+
+            {/* Bio */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-bio">Bio</Label>
+              <Textarea
+                id="edit-bio"
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                placeholder="Tell the world about yourself..."
+                className="bg-secondary border-border"
+                rows={3}
+              />
+            </div>
+
+            {/* Social Links */}
+            <div className="space-y-3 pt-2 border-t border-border">
+              <p className="text-sm font-medium text-muted-foreground">Social Links</p>
+              <div className="space-y-2">
+                <Label htmlFor="edit-twitter" className="flex items-center gap-2 text-sm">
+                  <Twitter className="w-3.5 h-3.5" /> Twitter
+                </Label>
+                <Input
+                  id="edit-twitter"
+                  value={editTwitter}
+                  onChange={(e) => setEditTwitter(e.target.value)}
+                  placeholder="username (without @)"
+                  className="bg-secondary border-border"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-instagram" className="flex items-center gap-2 text-sm">
+                  <Instagram className="w-3.5 h-3.5" /> Instagram
+                </Label>
+                <Input
+                  id="edit-instagram"
+                  value={editInstagram}
+                  onChange={(e) => setEditInstagram(e.target.value)}
+                  placeholder="username (without @)"
+                  className="bg-secondary border-border"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-website" className="flex items-center gap-2 text-sm">
+                  <Globe className="w-3.5 h-3.5" /> Website
+                </Label>
+                <Input
+                  id="edit-website"
+                  value={editWebsite}
+                  onChange={(e) => setEditWebsite(e.target.value)}
+                  placeholder="https://yourwebsite.com"
+                  className="bg-secondary border-border"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={saveEditProfile} className="bg-gradient-primary hover:bg-gradient-hover">
+              Save Profile
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
