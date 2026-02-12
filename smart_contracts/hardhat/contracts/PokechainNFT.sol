@@ -94,8 +94,8 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Deterministic Pokemon ID from tokenId via keccak256
-     * No storage needed — computed on read, making batch mints O(1)
+     * @dev Deterministic Pokemon ID from tokenId
+     * No storage needed — computed on read, making batch mints O(1) (impt for gas fees)
      * @param tokenId The token ID to get the Pokemon for
      * @return Pokemon ID (1-1025)
      */

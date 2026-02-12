@@ -213,6 +213,7 @@ npm run preview
 ```
 
 ### Local smart contracts (optional local chain)
+Only if you are redeploying contracts locally
 
 From `smart_contracts/hardhat`:
 
@@ -222,10 +223,13 @@ npx hardhat node
 npx hardhat run scripts/deploy.js --network localhost
 ```
 
+If using this option, replace contract addresses in src/config/abi/contracts.ts with locally deployed addresses, else we have already deployed to Sepolia testnet and those addresses should be sufficient
+
 ### Sepolia deploy (optional)
 
 From `smart_contracts/hardhat`:
 
+Only if you are redeploying contracts remotely
 ```bash
 npx hardhat run scripts/deploy_alchemy.js --network sepolia
 ```
