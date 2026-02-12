@@ -10,5 +10,5 @@ export const RPC_URL = "https://eth-sepolia.g.alchemy.com/v2/Zmb32QSiHBC5wPtSXBD
 export const BLOCK_EXPLORER = "https://sepolia.etherscan.io";
 
 // Contract addresses
-export const POKECHAIN_NFT_ADDRESS = "0x81fB17C365Ced2f050392E830729909618d27098";
-export const POKECHAIN_MARKETPLACE_ADDRESS = "0xf886ed45e96C615dC0bDBe82cF8423790bEb14ac";
+export const POKECHAIN_NFT_ADDRESS = "0xee3eC5a73D5c2e5D25029bbbbA7dA0496dBd9e1c";
+export const POKECHAIN_MARKETPLACE_ADDRESS = "0x668D5EE1300c2E049f42262A381ff5b253DFAeA4";

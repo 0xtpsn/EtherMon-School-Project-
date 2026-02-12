@@ -11,7 +11,7 @@ import "./utils/ReentrancyGuard.sol";
  * @dev ERC721A NFT contract for Pokechain Collection
  * Features:
  * - Gas-optimized batch minting (ERC721A)
- * - Randomized Pokemon assignment on mint (blind box)
+ * - Deterministic Pokemon assignment via hash (no storage writes)
  * - Sale toggle (emergency stop)
  * - ReentrancyGuard on withdraw
  * - Max 50 per wallet
@@ -36,15 +36,14 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
     string public baseExtension = ".json";
     bool public saleActive = false;
 
-    // Mapping from tokenId to Pokemon ID (1-1025)
-    mapping(uint256 => uint256) public tokenToPokemonId;
+
 
     /*///////////////////////////////////////////////////////////////
                               EVENTS
     //////////////////////////////////////////////////////////////*/
 
     event SaleToggled(bool isActive);
-    event Minted(address indexed to, uint256 indexed tokenId, uint256 pokemonId);
+
     event Withdrawn(address indexed to, uint256 amount);
     event BaseURIUpdated(string newBaseURI);
 
@@ -82,18 +81,9 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
         require(_numberMinted(msg.sender) + quantity <= MAX_PER_WALLET, "Exceeds wallet limit of 50");
         require(msg.value >= MINT_PRICE * quantity, "Insufficient payment");
 
-        uint256 startTokenId = _nextTokenId();
 
         // Mint the tokens
         _mint(msg.sender, quantity);
-
-        // Assign random Pokemon to each token
-        for (uint256 i = 0; i < quantity; i++) {
-            uint256 tokenId = startTokenId + i;
-            uint256 pokemonId = _randomPokemonId(tokenId);
-            tokenToPokemonId[tokenId] = pokemonId;
-            emit Minted(msg.sender, tokenId, pokemonId);
-        }
 
         // Refund excess payment
         if (msg.value > MINT_PRICE * quantity) {
@@ -104,18 +94,13 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Generate pseudo-random Pokemon ID based on on-chain data
-     * @param tokenId The token ID being minted
+     * @dev Deterministic Pokemon ID from tokenId via keccak256
+     * No storage needed — computed on read, making batch mints O(1)
+     * @param tokenId The token ID to get the Pokemon for
      * @return Pokemon ID (1-1025)
      */
-    function _randomPokemonId(uint256 tokenId) internal view returns (uint256) {
-        uint256 random = uint256(keccak256(abi.encodePacked(
-            block.timestamp,
-            block.difficulty,  // Note: Use block.prevrandao for Solidity 0.8.18+
-            msg.sender,
-            tokenId,
-            totalSupply()
-        )));
+    function _pokemonId(uint256 tokenId) internal pure returns (uint256) {
+        uint256 random = uint256(keccak256(abi.encodePacked("POKECHAIN", tokenId)));
         return (random % TOTAL_POKEMON) + 1;
     }
 
@@ -134,7 +119,7 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
-        uint256 pokemonId = tokenToPokemonId[tokenId];
+        uint256 pokemonId = _pokemonId(tokenId);
         string memory currentBaseURI = _baseURI();
         
         return bytes(currentBaseURI).length > 0
@@ -191,7 +176,7 @@ contract PokechainNFT is ERC721A, Ownable, ReentrancyGuard {
      */
     function getPokemonId(uint256 tokenId) external view returns (uint256) {
         require(_exists(tokenId), "Token does not exist");
-        return tokenToPokemonId[tokenId];
+        return _pokemonId(tokenId);
     }
 
     /**

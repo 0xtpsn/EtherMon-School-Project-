@@ -24,6 +24,9 @@ This README is the authoritative setup + architecture guide for running and unde
 10. API/Data Flow Notes
 11. Recent Fixes Covered in This Session
 12. Troubleshooting
+13. Demo Link
+
+note: Demo Video can be found below
 
 ## Overview
 
@@ -34,7 +37,7 @@ EtherMon combines:
 
 ### Core product flows
 
-- Mint Pokemon NFTs
+- Mint Pokemon NFTs (ERC721a contract)
 - List NFTs for fixed-price sale or auction
 - Place/update/cancel bids
 - Track profile activity, bids, and owned/liked assets
@@ -86,7 +89,6 @@ ethermon/
 - Flask 3
 - SQLite (`auction.db`)
 - APScheduler (auction processing)
-- Optional integrations: Resend email, Google OAuth
 
 ### Smart Contracts
 
@@ -132,13 +134,6 @@ DATABASE_PATH=auction.db
 UPLOAD_FOLDER=uploads
 SCHEDULER_INTERVAL_MINUTES=1
 PLATFORM_FEE_RATE=0.025
-
-# Optional integrations
-RESEND_API_KEY=
-EMAIL_FROM=ArtSpace <onboarding@resend.dev>
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-PASSWORD_RESET_BASE_URL=http://localhost:5173
 ```
 
 ### Hardhat (`smart_contracts/hardhat/.env`)
@@ -269,6 +264,8 @@ npx hardhat test
 
 ## 1) High-level system
 
+can be found in architecture.png in root folder (see image)
+
 ```text
 [Browser / React App]
       │
@@ -339,8 +336,6 @@ Defined in `src/App.tsx`:
 - Addresses + chain constants: `src/config/contracts.ts`
 - ABIs: `src/config/abi/*.json`
 
-## API/Data Flow Notes
-
 ### Authentication model
 
 - Backend uses cookie-based session auth (`credentials: include` from frontend)
@@ -359,25 +354,5 @@ Some profile-level features aggregate multiple sources:
 - `/api/me/*` endpoints
 - on-chain hooks
 
-This improves resiliency but requires careful source fallback logic.
-
-## Recent Fixes Covered in This Session
-
-The following frontend behavior was addressed during this session:
-
-1. **Profile undefined symbol regressions fixed**
-   - Restored missing imports/state and compile path in `src/pages/Profile.tsx`.
-
-2. **Watchlist tab removed from profile**
-   - Removed watchlist tab + associated UI rendering from profile view.
-
-3. **Bids tab source reliability improvements**
-   - Consolidated bids from multiple sources (`profileData.bids`, `/me/bids`, on-chain hooks).
-   - Added direct on-chain fallback to detect active highest-bid positions from live auction state.
-
-4. **Activity tab consistency on own profile**
-   - Added backend-activity fallback when on-chain activity is unavailable.
-
-5. **Light mode timer visibility fix**
-   - Improved countdown contrast in `src/pages/ArtDetail.tsx` for light theme.
-
+## Demo Link
+https://www.youtube.com/watch?v=L39Xi8qF9xo

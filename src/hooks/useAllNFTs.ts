@@ -114,8 +114,59 @@ export function useAllNFTs() {
         return () => { cancelled = true; };
     }, [refreshTrigger]);
 
+    // // Auto-refresh when marketplace events fire (listings, auctions, bids, etc.)
+    // useMarketplaceEventRefresh(refetch);
+
     return { nfts, loading, error, refetch };
 }
+
+// /**
+//  * Marketplace event names that indicate the homepage data is stale.
+//  */
+// const MARKETPLACE_EVENTS = [
+//     "ItemListed",
+//     "ItemSold",
+//     "ListingCancelled",
+//     "ListingUpdated",
+//     "AuctionCreated",
+//     "BidPlaced",
+//     "AuctionEnded",
+//     "AuctionCancelled"
+// ];
+
+// /**
+//  * Hook to subscribe to marketplace events and auto-refetch NFTs.
+//  * Used internally by useAllNFTs — split out for clarity.
+//  */
+// function useMarketplaceEventRefresh(refetch: () => void) {
+//     const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+//     useEffect(() => {
+//         const provider = new ethers.JsonRpcProvider(RPC_URL);
+//         const marketplace = new ethers.Contract(
+//             POKECHAIN_MARKETPLACE_ADDRESS,
+//             PokechainMarketplaceAbi,
+//             provider
+//         );
+
+//         // Debounce so multiple events in one tx don't cause multiple refetches
+//         const debouncedRefetch = () => {
+//             clearTimeout(timeoutRef.current);
+//             timeoutRef.current = setTimeout(() => {
+//                 console.log("[useAllNFTs] Marketplace event detected — refreshing");
+//                 refetch();
+//             }, 2000);
+//         };
+
+//         MARKETPLACE_EVENTS.forEach((event) => marketplace.on(event, debouncedRefetch));
+
+//         return () => {
+//             MARKETPLACE_EVENTS.forEach((event) => marketplace.off(event, debouncedRefetch));
+//             clearTimeout(timeoutRef.current);
+//             provider.destroy();
+//         };
+//     }, [refetch]);
+// }
 
 async function fetchSingleNFT(
     nftContract: ethers.Contract,
